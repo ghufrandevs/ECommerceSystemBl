@@ -1,0 +1,157 @@
+﻿@page "/admin/edit-product/{id:int}"
+
+@using ECommerceSystemBl.DTOs
+@using ECommerceSystemBl.DTOs.Category
+@using ECommerceSystemBl.Services
+@using MudBlazor
+
+@inject ProductService ProductService
+@inject CategoryService CategoryService
+@inject NavigationManager Navigation
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-8">
+
+    <MudPaper Elevation="4" Class="pa-6 rounded-lg">
+
+        <MudText Typo="Typo.h4">
+            ✏️ Edit Product
+        </MudText>
+
+        <MudText Typo="Typo.body2"
+                 Color="Color.Secondary"
+                 Class="mb-4">
+            Update the product information.
+        </MudText>
+
+        <MudTextField Class="mb-3"
+                      @bind-Value="product.ProductName"
+                      Label="Product Name"
+                      Variant="Variant.Outlined"
+                      Required="true" />
+
+        <MudTextField Class="mb-3"
+                      @bind-Value="product.Description"
+                      Label="Description"
+                      Variant="Variant.Outlined"
+                      Lines="3" />
+
+        <MudTextField Class="mb-3"
+                      @bind-Value="product.ImageUrl"
+                      Label="Image URL"
+                      Variant="Variant.Outlined" />
+
+        <MudSelect T="int"
+                   Class="mb-3"
+                   Label="Category"
+                   Variant="Variant.Outlined"
+                   @bind-Value="product.CategoryId">
+
+            @foreach (var category in categories)
+            {
+                <MudSelectItem Value="@category.CategoryId">
+                    @category.CategoryName
+                </MudSelectItem>
+            }
+
+        </MudSelect>
+
+        <MudGrid Class="mb-3">
+
+            <MudItem xs="12" md="6">
+
+                <MudNumericField T="decimal"
+                                 @bind-Value="product.Price"
+                                 Label="Price"
+                                 Variant="Variant.Outlined" />
+
+            </MudItem>
+
+            <MudItem xs="12" md="6">
+
+                <MudNumericField T="int"
+                                 @bind-Value="product.Stock"
+                                 Label="Stock"
+                                 Variant="Variant.Outlined" />
+
+            </MudItem>
+
+        </MudGrid>
+
+        <div class="d-flex justify-end mt-6">
+
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Secondary"
+                       OnClick="Cancel">
+
+                Cancel
+
+            </MudButton>
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       OnClick="Update"
+                       Class="ms-2">
+
+                Update Product
+
+            </MudButton>
+
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(message))
+        {
+            <MudAlert Severity="Severity.Success"
+                      Class="mt-4">
+
+                @message
+
+            </MudAlert>
+        }
+
+    </MudPaper>
+
+</MudContainer>
+
+@code
+{
+    [Parameter]
+    public int id { get; set; }
+
+    private ProductUpdateDTO product = new();
+
+    private List<CategoryOutputDTO> categories = new();
+
+    private string message = "";
+
+    protected override void OnInitialized()
+    {
+        categories = CategoryService.GetAll();
+
+        var existingProduct = ProductService.GetProductById(id);
+
+        if (existingProduct != null)
+        {
+            product.ProductName = existingProduct.ProductName;
+            product.Description = existingProduct.Description;
+            product.ImageUrl = existingProduct.ImageUrl;
+            product.Price = existingProduct.Price;
+            product.Stock = existingProduct.Stock;
+            product.CategoryId = existingProduct.CategoryId;
+        }
+    }
+
+    private void Update()
+    {
+        message = ProductService.UpdateProduct(id, product);
+
+        if (message == "Product Updated Successfully")
+        {
+            Navigation.NavigateTo("/products");
+        }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/products");
+    }
+}

@@ -1,0 +1,89 @@
+﻿@page "/admin/users"
+
+@using ECommerceSystemBl.DTOs
+@using ECommerceSystemBl.Services
+
+@inject UserService UserService
+@inject NavigationManager Navigation
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-8">
+
+    <MudStack Row="true"
+              Justify="Justify.SpaceBetween"
+              AlignItems="AlignItems.Center"
+              Class="mb-6">
+
+        <MudText Typo="Typo.h4">
+            👥 Manage Users
+        </MudText>
+
+    </MudStack>
+
+    <MudTextField @bind-Value="searchText"
+                  Label="Search User"
+                  Variant="Variant.Outlined"
+                  Immediate="true"
+                  Class="mb-4" />
+
+    <MudTable Items="FilteredUsers" Hover="true" Striped="true">
+
+        <HeaderContent>
+
+            <MudTh>Name</MudTh>
+            <MudTh>Email</MudTh>
+            <MudTh>Phone</MudTh>
+            <MudTh></MudTh>
+
+        </HeaderContent>
+
+        <RowTemplate>
+
+            <MudTd>@context.UserName</MudTd>
+
+            <MudTd>@context.UserEmail</MudTd>
+
+            <MudTd>@context.UserPhone</MudTd>
+
+            <MudTd>
+
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Primary"
+                           OnClick="@(() => EditUser(context.UserId))">
+
+                    Edit
+
+                </MudButton>
+
+            </MudTd>
+
+        </RowTemplate>
+
+    </MudTable>
+
+</MudContainer>
+
+@code
+{
+    private List<UserOutputDTO> users = new();
+
+    private string searchText = "";
+
+    private IEnumerable<UserOutputDTO> FilteredUsers =>
+        string.IsNullOrWhiteSpace(searchText)
+            ? users
+            : users.Where(u =>
+                u.UserName.Contains(searchText,
+                    StringComparison.OrdinalIgnoreCase)
+                || u.UserEmail.Contains(searchText,
+                    StringComparison.OrdinalIgnoreCase));
+
+    protected override void OnInitialized()
+    {
+        users = UserService.GetAllUsers();
+    }
+
+    private void EditUser(int id)
+    {
+        Navigation.NavigateTo($"/admin/edit-user/{id}");
+    }
+}

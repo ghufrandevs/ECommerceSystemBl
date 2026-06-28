@@ -1,0 +1,122 @@
+﻿@page "/admin/products"
+
+@using ECommerceSystemBl.DTOs
+@using ECommerceSystemBl.Services
+
+@inject ProductService ProductService
+@inject NavigationManager Navigation
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-8">
+
+    <MudStack Row="true"
+              Justify="Justify.SpaceBetween"
+              AlignItems="AlignItems.Center"
+              Class="mb-6">
+
+        <MudText Typo="Typo.h4">
+
+            📦 Manage Products
+
+        </MudText>
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   OnClick="AddProduct">
+
+            + Add Product
+
+        </MudButton>
+
+    </MudStack>
+
+    <MudTextField @bind-Value="searchText"
+                  Label="Search Product"
+                  Variant="Variant.Outlined"
+                  Immediate="true"
+                  Class="mb-4" />
+
+    <MudTable Items="FilteredProducts">
+
+        <HeaderContent>
+
+            <MudTh>Name</MudTh>
+
+            <MudTh>Price</MudTh>
+
+            <MudTh>Stock</MudTh>
+
+            <MudTh></MudTh>
+
+        </HeaderContent>
+
+        <RowTemplate>
+
+            <MudTd>@context.ProductName</MudTd>
+
+            <MudTd>OMR @context.Price</MudTd>
+
+            <MudTd>@context.Stock</MudTd>
+
+            <MudTd>
+
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Primary"
+                           OnClick="@(() => EditProduct(context.ProductId))">
+
+                    Edit
+                </MudButton>
+
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Error"
+                               OnClick="@(() => DeleteProduct(context.ProductId))">
+
+                        Delete
+
+                    </MudButton>
+
+            </MudTd>
+
+        </RowTemplate>
+
+    </MudTable>
+
+</MudContainer>
+
+@code {
+
+    private List<ProductOutputDTO> products = new();
+
+    private string searchText = "";
+
+    private IEnumerable<ProductOutputDTO> FilteredProducts =>
+        string.IsNullOrWhiteSpace(searchText)
+            ? products
+            : products.Where(p =>
+                p.ProductName.Contains(searchText,
+                StringComparison.OrdinalIgnoreCase));
+
+    protected override void OnInitialized()
+    {
+        products = ProductService.GetAllProducts();
+    }
+
+    private void AddProduct()
+    {
+        Navigation.NavigateTo("/admin/add-product");
+    }
+
+    private void EditProduct(int id)
+    {
+        Navigation.NavigateTo($"/admin/edit-product/{id}");
+    }
+
+    private void DeleteProduct(int id)
+    {
+        var result = ProductService.DeleteProduct(id);
+
+        products = ProductService.GetAllProducts();
+
+        StateHasChanged();
+    }
+
+}

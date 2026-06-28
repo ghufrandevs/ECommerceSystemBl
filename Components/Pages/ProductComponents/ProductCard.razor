@@ -1,0 +1,45 @@
+﻿@using ECommerceSystemBl.DTOs
+@inject NavigationManager Navigation
+
+<MudCard Class="pa-3"
+         Style="cursor:pointer"
+         @onclick="OpenProduct">
+
+    <MudCardContent>
+
+        <MudText Typo="Typo.h6">
+            @Product.ProductName
+        </MudText>
+
+        <MudText Typo="Typo.body2" Class="mb-2">
+            @Product.Description
+        </MudText>
+
+        <MudDivider Class="my-2" />
+
+        <MudText>
+            <b>Price:</b> OMR @Product.Price
+        </MudText>
+
+        <MudText>
+            <b>Stock:</b> @Product.Stock
+        </MudText>
+
+        <MudText>
+            <b>Rating:</b> ⭐ @Product.OverallRating
+        </MudText>
+
+    </MudCardContent>
+
+</MudCard>
+
+@code
+{
+    [Parameter]
+    public ProductOutputDTO Product { get; set; } = new();
+
+    private void OpenProduct()
+    {
+        Navigation.NavigateTo($"/products/{Product.ProductId}");
+    }
+}

@@ -1,0 +1,113 @@
+﻿@page "/admin/edit-category/{id:int}"
+
+@using ECommerceSystemBl.DTOs.Category
+@using ECommerceSystemBl.Services
+@using MudBlazor
+
+@inject CategoryService CategoryService
+@inject NavigationManager Navigation
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-8">
+
+    <MudPaper Elevation="4" Class="pa-6 rounded-lg">
+
+        <MudText Typo="Typo.h4">
+
+            ✏️ Edit Category
+
+        </MudText>
+
+        <MudText Typo="Typo.body2"
+                 Color="Color.Secondary"
+                 Class="mb-4">
+
+            Update category information.
+
+        </MudText>
+
+        <MudTextField @bind-Value="category.CategoryName"
+                      Label="Category Name"
+                      Variant="Variant.Outlined"
+                      Required="true"
+                      Class="mb-3" />
+
+        <MudTextField @bind-Value="category.Description"
+                      Label="Description"
+                      Variant="Variant.Outlined"
+                      Lines="3"
+                      Class="mb-3" />
+
+        <div class="d-flex justify-end mt-6">
+
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Secondary"
+                       OnClick="Cancel">
+
+                Cancel
+
+            </MudButton>
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       OnClick="Update"
+                       Class="ms-2">
+
+                Update Category
+
+            </MudButton>
+
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(message))
+        {
+            <MudAlert Severity="Severity.Success"
+                      Class="mt-4">
+
+                @message
+
+            </MudAlert>
+        }
+
+    </MudPaper>
+
+</MudContainer>
+
+@code {
+
+    [Parameter]
+    public int id { get; set; }
+
+    private CategoryUpdateDTO category = new();
+
+    private string message = "";
+
+    protected override void OnInitialized()
+    {
+        var existingCategory = CategoryService.GetById(id);
+
+        if (existingCategory != null)
+        {
+            category.CategoryId = existingCategory.CategoryId;
+            category.CategoryName = existingCategory.CategoryName;
+            category.Description = existingCategory.Description;
+        }
+    }
+
+    private void Update()
+    {
+        var result = CategoryService.Update(category);
+
+        message = result.Message;
+
+        if (result.Success)
+        {
+            Navigation.NavigateTo("/admin/categories");
+        }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/admin/categories");
+    }
+
+}

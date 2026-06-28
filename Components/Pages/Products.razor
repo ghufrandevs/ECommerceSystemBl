@@ -1,0 +1,29 @@
+﻿@page "/products"
+
+@using ECommerceSystemBl.DTOs
+@using ECommerceSystemBl.Services
+@using ECommerceSystemBl.Components.Pages.ProductComponents
+@inject ProductService ProductService
+
+<MudContainer MaxWidth="MaxWidth.Large">
+
+    <MudText Typo="Typo.h4" Class="mb-4">
+
+        Products
+
+    </MudText>
+
+    <ProductGrid Products="products" />
+
+</MudContainer>
+
+@code{
+
+    private List<ProductOutputDTO> products = new();
+
+    protected override void OnInitialized()
+    {
+        products = ProductService.GetAllProducts();
+    }
+
+}

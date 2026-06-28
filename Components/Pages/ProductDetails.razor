@@ -1,0 +1,128 @@
+﻿@page "/products/{id:int}"
+
+@using ECommerceSystemBl.DTOs
+@using ECommerceSystemBl.Services
+
+@inject ProductService ProductService
+@inject OrderService OrderService
+@inject NavigationManager Navigation
+
+@if (product == null)
+{
+    <MudAlert Severity="Severity.Error">
+        Product Not Found
+    </MudAlert>
+}
+else
+{
+    <MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+
+        <MudPaper Elevation="4" Class="pa-6 rounded-lg">
+
+            <MudText Typo="Typo.h4">
+                @product.ProductName
+            </MudText>
+
+            <MudText Typo="Typo.body2"
+                     Color="Color.Secondary"
+                     Class="mb-4">
+
+                @product.Description
+
+            </MudText>
+
+            <MudDivider Class="mb-4" />
+
+            <MudText Class="mb-2">
+                <b>Price:</b> OMR @product.Price
+            </MudText>
+
+            <MudText Class="mb-2">
+                <b>Stock:</b> @product.Stock
+            </MudText>
+
+            <MudText Class="mb-4">
+                <b>Rating:</b> ⭐ @product.OverallRating
+            </MudText>
+
+            <MudStack Row="true"
+                      Spacing="2">
+
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Success"
+                           OnClick="BuyNow">
+
+                    🛒 Buy Now
+
+                </MudButton>
+
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Secondary"
+                           OnClick="Back">
+
+                    Back
+
+                </MudButton>
+
+            </MudStack>
+
+            @if (!string.IsNullOrWhiteSpace(message))
+            {
+                <MudAlert Severity="Severity.Success"
+                          Class="mt-4">
+
+                    @message
+
+                </MudAlert>
+            }
+
+        </MudPaper>
+
+    </MudContainer>
+}
+
+@code
+{
+    [Parameter]
+    public int id { get; set; }
+
+    private ProductOutputDTO? product;
+
+    private string message = "";
+
+    protected override void OnParametersSet()
+    {
+        product = ProductService.GetProductById(id);
+    }
+
+    private void BuyNow()
+    {
+        PlaceOrderDTO dto = new()
+        {
+            Items = new List<ItemDTO>
+        {
+            new ItemDTO
+            {
+                ProductId = id,
+                Quantity = 1
+            }
+        }
+        };
+
+        var result = OrderService.PlaceOrder(dto, 1);
+
+        if (result is string messageResult)
+        {
+            message = messageResult;
+        }
+        else
+        {
+            message = "Order Placed Successfully";
+        }
+    }
+
+    private void Back()
+    {
+        Navigation.NavigateTo("/products");
+    }
+}

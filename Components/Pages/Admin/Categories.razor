@@ -1,0 +1,129 @@
+﻿@page "/admin/categories"
+
+@using ECommerceSystemBl.DTOs.Category
+@using ECommerceSystemBl.Services
+
+@inject CategoryService CategoryService
+@inject NavigationManager Navigation
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-8">
+
+    <MudStack Row="true"
+              Justify="Justify.SpaceBetween"
+              AlignItems="AlignItems.Center"
+              Class="mb-6">
+
+        <MudText Typo="Typo.h4">
+
+            📂 Manage Categories
+
+        </MudText>
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   OnClick="AddCategory">
+
+            + Add Category
+
+        </MudButton>
+
+    </MudStack>
+
+    <MudTextField @bind-Value="searchText"
+                  Label="Search Category"
+                  Variant="Variant.Outlined"
+                  Immediate="true"
+                  Class="mb-4" />
+
+    <MudTable Items="FilteredCategories">
+
+        <HeaderContent>
+
+            <MudTh>Name</MudTh>
+
+            <MudTh>Description</MudTh>
+
+            <MudTh></MudTh>
+
+        </HeaderContent>
+
+        <RowTemplate>
+
+            <MudTd>@context.CategoryName</MudTd>
+
+            <MudTd>@context.Description</MudTd>
+
+            <MudTd>
+
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Primary"
+                           OnClick="@(() => EditCategory(context.CategoryId))">
+
+                    Edit
+
+                </MudButton>
+
+                <MudButton Variant="Variant.Text"
+                           Color="Color.Error"
+                           OnClick="@(() => DeleteCategory(context.CategoryId))">
+
+                    Delete
+
+                </MudButton>
+
+            </MudTd>
+
+        </RowTemplate>
+
+    </MudTable>
+
+    @if (!string.IsNullOrWhiteSpace(message))
+    {
+        <MudAlert Severity="Severity.Success"
+                  Class="mt-4">
+
+            @message
+
+        </MudAlert>
+    }
+
+</MudContainer>
+
+@code {
+
+    private List<CategoryOutputDTO> categories = new();
+
+    private string searchText = "";
+
+    private string message = "";
+
+    private IEnumerable<CategoryOutputDTO> FilteredCategories =>
+        string.IsNullOrWhiteSpace(searchText)
+            ? categories
+            : categories.Where(c =>
+                c.CategoryName.Contains(searchText,
+                StringComparison.OrdinalIgnoreCase));
+
+    protected override void OnInitialized()
+    {
+        categories = CategoryService.GetAll();
+    }
+
+    private void AddCategory()
+    {
+        Navigation.NavigateTo("/admin/add-category");
+    }
+
+    private void EditCategory(int id)
+    {
+        Navigation.NavigateTo($"/admin/edit-category/{id}");
+    }
+
+    private void DeleteCategory(int id)
+    {
+        message = CategoryService.Delete(id).Message;
+
+        categories = CategoryService.GetAll();
+    }
+
+}

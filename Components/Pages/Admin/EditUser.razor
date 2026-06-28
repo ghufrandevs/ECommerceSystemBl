@@ -1,0 +1,150 @@
+﻿@page "/admin/edit-user/{id:int}"
+
+@using ECommerceSystemBl.DTOs
+@using ECommerceSystemBl.Services
+@using MudBlazor
+
+@inject UserService UserService
+@inject NavigationManager Navigation
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-8">
+
+    <MudPaper Elevation="4" Class="pa-6 rounded-lg">
+
+        <MudText Typo="Typo.h4">
+            ✏️ Edit User
+        </MudText>
+
+        <MudText Typo="Typo.body2"
+                 Color="Color.Secondary"
+                 Class="mb-4">
+
+            Update user information.
+
+        </MudText>
+
+        <MudTextField @bind-Value="user.UserName"
+                      Label="User Name"
+                      Variant="Variant.Outlined"
+                      Required="true"
+                      Class="mb-3" />
+
+        <MudTextField @bind-Value="user.UserEmail"
+                      Label="Email"
+                      Variant="Variant.Outlined"
+                      Required="true"
+                      Class="mb-3" />
+
+        <MudTextField @bind-Value="user.UserPassword"
+                      Label="Password"
+                      InputType="InputType.Password"
+                      Variant="Variant.Outlined"
+                      Required="true"
+                      Class="mb-3" />
+
+        <MudTextField @bind-Value="user.UserPhone"
+                      Label="Phone"
+                      Variant="Variant.Outlined"
+                      Required="true"
+                      Class="mb-3" />
+
+        <MudSelect T="string"
+                   @bind-Value="user.Role"
+                   Label="Role"
+                   Variant="Variant.Outlined"
+                   Class="mb-3">
+
+            <MudSelectItem Value="@("Admin")">Admin</MudSelectItem>
+
+            <MudSelectItem Value="@("Customer")">Customer</MudSelectItem>
+
+        </MudSelect>
+
+        <MudSwitch @bind-Value="user.IsActive"
+                   Color="Color.Success">
+
+            Active Account
+
+        </MudSwitch>
+
+        <MudStack Row="true"
+                  Justify="Justify.SpaceBetween"
+                  Class="mt-6">
+
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Secondary"
+                       OnClick="Cancel">
+
+                Cancel
+
+            </MudButton>
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       OnClick="UpdateUser">
+
+                Update User
+
+            </MudButton>
+
+        </MudStack>
+
+        @if (!string.IsNullOrWhiteSpace(message))
+        {
+            <MudAlert Severity="Severity.Success"
+                      Class="mt-4">
+
+                @message
+
+            </MudAlert>
+        }
+
+    </MudPaper>
+
+</MudContainer>
+
+@code {
+
+    [Parameter]
+    public int id { get; set; }
+
+    private UserUpdateDTO user = new();
+
+    private string message = "";
+
+    protected override void OnInitialized()
+    {
+        var existingUser = UserService.GetUserById(id);
+
+        if (existingUser != null)
+        {
+            user.UserName = existingUser.UserName;
+            user.UserEmail = existingUser.UserEmail;
+            user.UserPhone = existingUser.UserPhone;
+
+            user.Role = "Customer";
+
+            user.IsActive = true;
+        }
+    }
+
+    private void UpdateUser()
+    {
+        message = UserService.UpdateUser(
+            id,
+            user,
+            id,
+            true);
+
+        if (message == "User Updated Successfully")
+        {
+            Navigation.NavigateTo("/admin/users");
+        }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/admin/users");
+    }
+
+}

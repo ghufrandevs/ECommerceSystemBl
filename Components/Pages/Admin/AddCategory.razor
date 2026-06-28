@@ -1,0 +1,67 @@
+﻿@page "/add-category"
+@using ECommerceSystemBl.DTOs.Category
+@using ECommerceSystemBl.Services
+@using MudBlazor
+
+@inject CategoryService CategoryService
+
+<MudContainer MaxWidth="MaxWidth.Small">
+
+    <MudPaper Class="pa-6">
+
+        <MudText Typo="Typo.h4" Class="mb-4">
+            Add Category
+        </MudText>
+
+        <MudTextField @bind-Value="category.CategoryName"
+                      Label="Category Name"
+                      Variant="Variant.Outlined"
+                      Required="true" />
+
+        <MudTextField @bind-Value="category.Description"
+                      Label="Description"
+                      Variant="Variant.Outlined"
+                      Lines="3" />
+
+        <MudButton Variant="Variant.Filled"
+                   Color="Color.Primary"
+                   Class="mt-4"
+                   OnClick="Save">
+
+            Save Category
+
+        </MudButton>
+
+        @if (!string.IsNullOrWhiteSpace(message))
+        {
+            <MudAlert Severity="Severity.Success"
+                      Class="mt-4">
+
+                @message
+
+            </MudAlert>
+        }
+
+    </MudPaper>
+
+</MudContainer>
+
+@code {
+
+    private CategoryCreateDTO category = new();
+
+    private string message = "";
+
+    private void Save()
+    {
+        var result = CategoryService.Add(category);
+
+        message = result.Message;
+
+        if (result.Success)
+        {
+            category = new CategoryCreateDTO();
+        }
+    }
+
+}

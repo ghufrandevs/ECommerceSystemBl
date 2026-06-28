@@ -1,0 +1,149 @@
+﻿@page "/admin/dashboard"
+
+@inject NavigationManager Navigation
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="mt-8">
+
+    <MudText Typo="Typo.h3">
+        👋 Welcome Admin
+    </MudText>
+
+    <MudText Typo="Typo.body1"
+             Color="Color.Secondary"
+             Class="mb-6">
+
+        Manage your e-commerce system from one place.
+
+    </MudText>
+
+    <MudGrid>
+
+        <MudItem xs="12" md="4">
+
+            <MudCard Elevation="4" Class="pa-4">
+
+                <MudCardContent>
+
+                    <MudText Typo="Typo.h5">
+
+                        📦 Products
+
+                    </MudText>
+
+                    <MudText Class="mt-2">
+
+                        Add, edit, delete and manage products.
+
+                    </MudText>
+
+                </MudCardContent>
+
+                <MudCardActions>
+
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               OnClick="OpenProducts">
+
+                        Open
+
+                    </MudButton>
+
+                </MudCardActions>
+
+            </MudCard>
+
+        </MudItem>
+
+        <MudItem xs="12" md="4">
+
+            <MudCard Elevation="4" Class="pa-4">
+
+                <MudCardContent>
+
+                    <MudText Typo="Typo.h5">
+
+                        📂 Categories
+
+                    </MudText>
+
+                    <MudText Class="mt-2">
+
+                        Manage product categories.
+
+                    </MudText>
+
+                </MudCardContent>
+
+                <MudCardActions>
+
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               OnClick="OpenCategories">
+
+                        Open
+
+                    </MudButton>
+
+                </MudCardActions>
+
+            </MudCard>
+
+        </MudItem>
+
+        <MudItem xs="12" md="4">
+
+            <MudCard Elevation="4" Class="pa-4">
+
+                <MudCardContent>
+
+                    <MudText Typo="Typo.h5">
+
+                        👥 Users
+
+                    </MudText>
+
+                    <MudText Class="mt-2">
+
+                        View registered users.
+
+                    </MudText>
+
+                </MudCardContent>
+
+                <MudCardActions>
+
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               OnClick="OpenUsers">
+
+                        Open
+
+                    </MudButton>
+
+                </MudCardActions>
+
+            </MudCard>
+
+        </MudItem>
+
+    </MudGrid>
+
+</MudContainer>
+
+@code
+{
+    private void OpenProducts()
+    {
+        Navigation.NavigateTo("/admin/products");
+    }
+
+    private void OpenCategories()
+    {
+        Navigation.NavigateTo("/admin/categories");
+    }
+
+    private void OpenUsers()
+    {
+        Navigation.NavigateTo("/admin/users");
+    }
+}

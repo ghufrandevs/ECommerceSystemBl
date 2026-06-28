@@ -1,0 +1,21 @@
+﻿@using ECommerceSystemBl.DTOs
+
+<MudGrid>
+
+    @foreach (var product in Products)
+    {
+        <MudItem xs="12" sm="6" md="4">
+
+            <ProductCard Product="product" />
+
+        </MudItem>
+    }
+
+</MudGrid>
+
+@code {
+
+    [Parameter]
+    public List<ProductOutputDTO> Products { get; set; } = new();
+
+}
