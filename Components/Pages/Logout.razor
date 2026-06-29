@@ -1,0 +1,17 @@
+﻿@page "/logout"
+@using ECommerceSystemBl.Services
+@inject CustomAuthenticationStateProvider AuthProvider
+@inject NavigationManager Navigation
+
+
+@code {
+
+    protected override void OnInitialized()
+    {
+        AuthProvider.Logout();
+        
+
+        Navigation.NavigateTo("/login", true);
+    }
+
+}

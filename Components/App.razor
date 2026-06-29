@@ -1,4 +1,6 @@
 ﻿@using ECommerceSystemBl.Theme
+@using Microsoft.AspNetCore.Components.Authorization
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -24,11 +26,18 @@
 </head>
 
 <body>
-    <MudThemeProvider Theme="@Theme.AppTheme.CommerceTheme" />
-    <MudDialogProvider />
-    <MudSnackbarProvider />
 
-    <Routes @rendermode="InteractiveServer" />
+    <CascadingAuthenticationState>
+
+        <MudThemeProvider Theme="@Theme.AppTheme.CommerceTheme" />
+
+        <MudDialogProvider />
+
+        <MudSnackbarProvider />
+
+        <Routes @rendermode="InteractiveServer" />
+
+    </CascadingAuthenticationState>
 
     <ReconnectModal />
 

@@ -1,4 +1,5 @@
-﻿using ECommerceSystemBl.Models;
+﻿using ECommerceSystemBl.DTOs;
+using ECommerceSystemBl.Models;
 
 namespace ECommerceSystemBl.Repositories
 {
@@ -72,6 +73,28 @@ namespace ECommerceSystemBl.Repositories
         {
             _context.Products.Update(product);
             _context.SaveChanges();
+        }
+
+        public List<ReviewOutputDTO> GetProductReviews(int productId)
+        {
+            return _context.Reviews
+                .Where(r => r.ProductId == productId)
+                .OrderByDescending(r => r.ReviewDate)
+                .Select(r => new ReviewOutputDTO
+                {
+                    ReviewId = r.ReviewId,
+                    UserName = r.User.UserName,
+                    Rating = r.Rating,
+                    Comment = r.Comment,
+                    ReviewDate = r.ReviewDate
+                })
+                .ToList();
+        }
+        public Review? GetUserReview(int userId, int productId)
+        {
+            return _context.Reviews.FirstOrDefault(r =>
+                r.UserId == userId &&
+                r.ProductId == productId);
         }
     }
 }

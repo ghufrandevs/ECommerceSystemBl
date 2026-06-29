@@ -1,0 +1,107 @@
+﻿@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+@page "/my-orders"
+
+@using ECommerceSystemBl.Models
+@using ECommerceSystemBl.Services
+
+@inject OrderService OrderService
+@inject NavigationManager Navigation
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
+
+    <MudText Typo="Typo.h4" Class="mb-4">
+        My Orders
+    </MudText>
+
+    @if (orders.Count == 0)
+    {
+        <MudAlert Severity="Severity.Info">
+            You don't have any orders yet.
+        </MudAlert>
+    }
+    else
+    {
+        <MudTable Items="orders" Hover="true" Striped="true">
+
+            <HeaderContent>
+
+                <MudTh>Order ID</MudTh>
+                <MudTh>Order Date</MudTh>
+                <MudTh>Total Amount</MudTh>
+                <MudTh>Action</MudTh>
+
+            </HeaderContent>
+
+            <RowTemplate>
+
+                <MudTd>@context.OrderId</MudTd>
+
+                <MudTd>
+                    @context.OrderDate.ToString("dd/MM/yyyy")
+                </MudTd>
+
+                <MudTd>
+                    OMR @context.TotalAmount
+                </MudTd>
+
+                <MudTd>
+
+                    <MudButton Color="Color.Primary"
+                               Variant="Variant.Filled"
+                               OnClick="@(() => ViewDetails(context.OrderId))">
+
+                        View Details
+
+                    </MudButton>
+
+                </MudTd>
+
+            </RowTemplate>
+
+        </MudTable>
+    }
+
+</MudContainer>
+
+@code {
+    private List<Order> orders = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState =
+            await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        var user = authState.User;
+
+        Console.WriteLine($"Authenticated: {user.Identity?.IsAuthenticated}");
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            int userId = int.Parse(
+                user.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+            Console.WriteLine($"UserId = {userId}");
+
+            orders = OrderService.ViewMyOrders(userId);
+
+            Console.WriteLine($"Orders Count = {orders.Count}");
+        }
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            int userId = int.Parse(
+                user.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+            orders = OrderService.ViewMyOrders(userId);
+        }
+    }
+
+    private void ViewDetails(int orderId)
+    {
+        Navigation.NavigateTo($"/orders/{orderId}");
+    }
+}

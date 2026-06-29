@@ -19,6 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Components\Pages\Customer\" />
     <Folder Include="wwwroot\Images\" />
   </ItemGroup>
 

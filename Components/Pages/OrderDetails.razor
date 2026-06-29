@@ -1,0 +1,116 @@
+﻿@page "/orders/{id:int}"
+
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+
+@using ECommerceSystemBl.DTOs
+@using ECommerceSystemBl.Services
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject OrderService OrderService
+@inject NavigationManager Navigation
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
+
+    <MudText Typo="Typo.h4" Class="mb-4">
+        Order Details
+    </MudText>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <MudAlert Severity="Severity.Error">
+            @errorMessage
+        </MudAlert>
+    }
+    else
+    {
+        <MudTable Items="orderDetails" Hover="true" Striped="true">
+
+            <HeaderContent>
+                <MudTh>Product</MudTh>
+                <MudTh>Price</MudTh>
+                <MudTh>Quantity</MudTh>
+                <MudTh>Total</MudTh>
+            </HeaderContent>
+
+            <RowTemplate>
+                <MudTd>@context.ProductName</MudTd>
+
+                <MudTd>
+                    OMR @context.Price
+                </MudTd>
+
+                <MudTd>
+                    @context.Quantity
+                </MudTd>
+
+                <MudTd>
+                    OMR @(context.Price * context.Quantity)
+                </MudTd>
+            </RowTemplate>
+
+        </MudTable>
+
+        <MudText Typo="Typo.h6" Class="mt-4 text-end">
+            Order Total: OMR @orderTotal
+        </MudText>
+    }
+
+    <MudButton Variant="Variant.Outlined"
+               Color="Color.Secondary"
+               Class="mt-4"
+               OnClick="Back">
+
+        Back
+
+    </MudButton>
+
+</MudContainer>
+
+@code
+{
+    [Parameter]
+    public int id { get; set; }
+
+    private List<OrderDetailsDTO> orderDetails = new();
+
+    private decimal orderTotal;
+
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState =
+            await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            int userId = int.Parse(
+                user.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+            var result = OrderService.GetOrderDetails(id, userId);
+
+            if (result is string error)
+            {
+                errorMessage = error;
+            }
+            else
+            {
+                orderDetails = (List<OrderDetailsDTO>)result;
+
+                orderTotal = orderDetails.Sum(x => x.Price * x.Quantity);
+            }
+        }
+        else
+        {
+            errorMessage = "Please login first.";
+        }
+    }
+
+    private void Back()
+    {
+        Navigation.NavigateTo("/my-orders");
+    }
+}

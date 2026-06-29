@@ -1,4 +1,9 @@
-﻿@page "/products/{id:int}"
+﻿@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using ECommerceSystemBl.Models
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject ReviewService ReviewService
+@page "/products/{id:int}"
 
 @using ECommerceSystemBl.DTOs
 @using ECommerceSystemBl.Services
@@ -75,7 +80,85 @@ else
 
                 </MudAlert>
             }
+            <MudDivider Class="my-5" />
 
+            <MudText Typo="Typo.h5" Class="mb-3">
+                Customer Reviews
+            </MudText>
+
+            @if (reviews.Count == 0)
+            {
+                <MudAlert Severity="Severity.Info">
+                    No reviews yet.
+                </MudAlert>
+            }
+
+
+            else
+            {
+                @foreach (var review in reviews)
+                {
+                    <MudPaper Class="pa-3 mb-3" Elevation="1">
+
+                        <MudText Typo="Typo.subtitle2">
+                            <b>@review.UserName</b>
+                        </MudText>
+
+                        <MudText Typo="Typo.subtitle1">
+                            ⭐ @review.Rating / 5
+                        </MudText>
+
+                        <MudText Typo="Typo.body1">
+                            @review.Comment
+                        </MudText>
+
+                        <MudText Typo="Typo.caption"
+                                 Color="Color.Secondary">
+
+                            @review.ReviewDate.ToString("dd/MM/yyyy")
+
+                        </MudText>
+
+                    </MudPaper>
+                }
+            }
+            <MudDivider Class="my-5" />
+
+            <MudText Typo="Typo.h5" Class="mb-3">
+                Write a Review
+            </MudText>
+
+            <MudNumericField T="int"
+                             Label="Rating (1-5)"
+                             @bind-Value="review.Rating"
+                             Min="1"
+                             Max="5"
+                             Variant="Variant.Outlined"
+                             Class="mb-3" />
+
+            <MudTextField Label="Comment"
+                          @bind-Value="review.Comment"
+                          Lines="4"
+                          Variant="Variant.Outlined"
+                          Class="mb-3" />
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       OnClick="AddReview">
+
+                Submit Review
+
+            </MudButton>
+
+            @if (!string.IsNullOrWhiteSpace(reviewMessage))
+            {
+                <MudAlert Severity="Severity.Info"
+                          Class="mt-3">
+
+                    @reviewMessage
+
+                </MudAlert>
+            }
         </MudPaper>
 
     </MudContainer>
@@ -93,10 +176,29 @@ else
     protected override void OnParametersSet()
     {
         product = ProductService.GetProductById(id);
+        reviews = ReviewService.GetProductReviews(id);
+        review.ProductId = id;
     }
 
-    private void BuyNow()
+    private async Task BuyNow()
     {
+        var authState =
+            await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        var user = authState.User;
+
+
+        if (user.Identity?.IsAuthenticated != true)
+        {
+            message = "Please login first.";
+            return;
+        }
+
+        int userId = int.Parse(
+            user.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        
+
         PlaceOrderDTO dto = new()
         {
             Items = new List<ItemDTO>
@@ -109,7 +211,7 @@ else
         }
         };
 
-        var result = OrderService.PlaceOrder(dto, 1);
+        var result = OrderService.PlaceOrder(dto, userId);
 
         if (result is string messageResult)
         {
@@ -117,12 +219,48 @@ else
         }
         else
         {
-            message = "Order Placed Successfully";
+            Navigation.NavigateTo("/my-orders");
         }
     }
 
     private void Back()
     {
         Navigation.NavigateTo("/products");
+    }
+
+    private List<ReviewOutputDTO> reviews = new();
+    private ReviewCreateDTO review = new();
+
+    private string reviewMessage = "";
+
+    private async Task AddReview()
+    {
+        var authState =
+            await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated != true)
+        {
+            reviewMessage = "Please login first.";
+            return;
+        }
+
+        int userId = int.Parse(
+            user.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        review.ProductId = id;
+
+        reviewMessage = ReviewService.AddReview(review, userId);
+
+        reviews = ReviewService.GetProductReviews(id);
+
+        if (reviewMessage == "Review Added Successfully")
+        {
+            review = new ReviewCreateDTO
+            {
+                ProductId = id
+            };
+        }
     }
 }

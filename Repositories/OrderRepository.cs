@@ -1,4 +1,5 @@
-﻿using ECommerceSystemBl.Models;
+﻿using ECommerceSystemBl.DTOs;
+using ECommerceSystemBl.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace ECommerceSystemBl.Repositories
@@ -29,20 +30,19 @@ namespace ECommerceSystemBl.Repositories
                 .ToList();
         }
 
-        public List<object> GetOrderDetails(int orderId)
+        public List<OrderDetailsDTO> GetOrderDetails(int orderId)
         {
             return _context.OrderProductss
-                .Include(op => op.Product)
-                .Where(op => op.OrderId == orderId)
-                .Select(op => new
-                {
-                    op.ProductId,
-                    op.Product.ProductName,
-                    op.Product.Price,
-                    op.Quantity
-                })
-                .Cast<object>()
-                .ToList();
+      .Include(op => op.Product)
+      .Where(op => op.OrderId == orderId)
+      .Select(op => new OrderDetailsDTO
+      {
+        ProductId = op.ProductId,
+        ProductName = op.Product.ProductName,
+        Price = op.Product.Price,
+        Quantity = op.Quantity
+      })
+       .ToList();
         }
 
     }

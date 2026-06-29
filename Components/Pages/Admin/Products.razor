@@ -2,6 +2,8 @@
 
 @using ECommerceSystemBl.DTOs
 @using ECommerceSystemBl.Services
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Roles = "Admin")]
 
 @inject ProductService ProductService
 @inject NavigationManager Navigation

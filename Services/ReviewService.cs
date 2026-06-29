@@ -94,9 +94,13 @@ namespace ECommerceSystemBl.Services
 
             return "Review Updated Successfully";
         }
-        public string DeleteReview(
-    int id,
-    int userId)
+
+        public List<ReviewOutputDTO> GetProductReviews(int productId)
+        {
+            return _reviewRepository.GetProductReviews(productId);
+        }
+
+        public string DeleteReview( int id,int userId)
         {
             var review = _reviewRepository.GetById(id);
 
@@ -134,6 +138,11 @@ namespace ECommerceSystemBl.Services
             _reviewRepository.UpdateProductRating(product);
 
             return "Review Deleted Successfully";
+        }
+
+        public Review? GetUserReview(int userId, int productId)
+        {
+            return _reviewRepository.GetUserReview(userId, productId);
         }
     }
 }

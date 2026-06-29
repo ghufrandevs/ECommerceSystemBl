@@ -1,0 +1,96 @@
+﻿@page "/register"
+
+@using ECommerceSystemBl.DTOs
+@using ECommerceSystemBl.Services
+
+@inject UserService UserService
+@inject NavigationManager Navigation
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+
+    <MudPaper Elevation="4" Class="pa-6">
+
+        <MudText Typo="Typo.h4" Class="mb-4">
+
+            Create Account
+
+        </MudText>
+
+        <MudForm>
+
+            <MudTextField Label="User Name"
+                          @bind-Value="user.UserName"
+                          Required="true"
+                          Variant="Variant.Outlined" />
+
+            <MudTextField Label="Email"
+                          @bind-Value="user.UserEmail"
+                          Required="true"
+                          Variant="Variant.Outlined"
+                          Class="mt-3" />
+
+            <MudTextField Label="Password"
+                          @bind-Value="user.UserPassword"
+                          InputType="InputType.Password"
+                          Required="true"
+                          Variant="Variant.Outlined"
+                          Class="mt-3" />
+
+            <MudTextField Label="Phone"
+                          @bind-Value="user.UserPhone"
+                          Required="true"
+                          Variant="Variant.Outlined"
+                          Class="mt-3" />
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       FullWidth="true"
+                       Class="mt-5"
+                       OnClick="SignUp">
+
+                Register
+
+            </MudButton>
+
+        </MudForm>
+
+        @if (!string.IsNullOrWhiteSpace(message))
+        {
+            <MudAlert Severity="@severity"
+                      Class="mt-4">
+
+                @message
+
+            </MudAlert>
+        }
+
+    </MudPaper>
+
+</MudContainer>
+
+@code
+{
+    private UserRegisterDTO user = new();
+
+    private string message = "";
+
+    private Severity severity = Severity.Success;
+
+    private void SignUp()
+    {
+        var result = UserService.Register(user);
+
+        message = result;
+
+        if (result == "Account Created Successfully")
+        {
+            severity = Severity.Success;
+
+            Navigation.NavigateTo("/login");
+        }
+        else
+        {
+            severity = Severity.Error;
+        }
+    }
+}

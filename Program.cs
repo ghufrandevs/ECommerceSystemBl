@@ -4,6 +4,7 @@ using ECommerceSystemBl.Repositories;
 using ECommerceSystemBl.Services;
 using Microsoft.EntityFrameworkCore;
 using MudBlazor.Services;
+using Microsoft.AspNetCore.Components.Authorization;
 
 namespace ECommerceSystemBl
 {
@@ -18,6 +19,7 @@ namespace ECommerceSystemBl
                 .AddInteractiveServerComponents();
 
             builder.Services.AddMudServices();
+
 
             builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(
@@ -41,6 +43,13 @@ namespace ECommerceSystemBl
             builder.Services.AddScoped<PasswordService>();
             builder.Services.AddScoped<JwtService>();
             builder.Services.AddScoped<EmailService>();
+
+            builder.Services.AddAuthorizationCore();
+
+            builder.Services.AddScoped<CustomAuthenticationStateProvider>();
+
+            builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
+                sp.GetRequiredService<CustomAuthenticationStateProvider>());
 
 
             var app = builder.Build();

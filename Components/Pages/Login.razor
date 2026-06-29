@@ -1,0 +1,96 @@
+﻿@page "/login"
+
+@using ECommerceSystemBl.DTOs
+@using ECommerceSystemBl.Services
+
+@inject CustomAuthenticationStateProvider AuthProvider
+@inject UserService UserService
+@inject NavigationManager Navigation
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+
+    <MudPaper Elevation="4" Class="pa-6">
+
+        <MudText Typo="Typo.h4" Class="mb-4">
+
+            Login
+
+        </MudText>
+
+        <MudForm>
+
+            <MudTextField Label="Email"
+                          @bind-Value="login.UserEmail"
+                          Variant="Variant.Outlined"
+                          Required="true" />
+
+            <MudTextField Label="Password"
+                          @bind-Value="login.UserPassword"
+                          InputType="InputType.Password"
+                          Variant="Variant.Outlined"
+                          Required="true"
+                          Class="mt-3" />
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       FullWidth="true"
+                       Class="mt-5"
+                       OnClick="SignIn">
+
+                Login
+
+            </MudButton>
+
+        </MudForm>
+
+        @if (!string.IsNullOrWhiteSpace(message))
+        {
+            <MudAlert Severity="@severity"
+                      Class="mt-4">
+
+                @message
+
+            </MudAlert>
+        }
+
+    </MudPaper>
+
+</MudContainer>
+
+@code {
+
+    private LoginDTO login = new();
+
+    private string message = "";
+
+    private Severity severity = Severity.Success;
+
+    private void SignIn()
+    {
+        var result = UserService.Login(login);
+
+        if (result is string error)
+        {
+            severity = Severity.Error;
+            message = error;
+            return;
+        }
+
+        LoginResultDTO user = (LoginResultDTO)result;
+
+        AuthProvider.MarkUserAsAuthenticated(user.Token);
+        
+        severity = Severity.Success;
+        message = user.Message;
+
+        if (user.Role == "Admin")
+        {
+            Navigation.NavigateTo("/admin/dashboard");
+        }
+        else
+        {
+            Navigation.NavigateTo("/");
+        }
+    }
+
+}

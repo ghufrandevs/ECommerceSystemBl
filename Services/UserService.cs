@@ -82,11 +82,12 @@ namespace ECommerceSystemBl.Services
 
             string token = _jwtService.GenerateToken(user);
 
-            return new
+            return new LoginResultDTO
             {
                 Message = "Login Successful",
                 Token = token,
                 UserId = user.UserId,
+                UserName = user.UserName,
                 Role = user.Role
             };
         }
