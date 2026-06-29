@@ -1,0 +1,41 @@
+﻿.product-card {
+    cursor: pointer;
+    border-radius: 18px;
+    overflow: hidden;
+    transition: .3s;
+    height: 100%;
+}
+
+    .product-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 30px rgba(0,0,0,.12);
+    }
+
+.product-title {
+    font-weight: 700;
+    color: #4E342E;
+}
+
+.product-description {
+    color: #777;
+    min-height: 45px;
+}
+
+.price {
+    color: #B67A42;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.rating {
+    color: #E6A700;
+    font-weight: 600;
+}
+
+.mud-card-media {
+    object-fit: cover;
+}
+.product-image {
+    object-fit: cover;
+    width: 100%;
+}

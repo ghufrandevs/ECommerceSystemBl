@@ -1,8 +1,11 @@
 ﻿@page "/products"
 
+@using Microsoft.AspNetCore.Components
 @using ECommerceSystemBl.DTOs
 @using ECommerceSystemBl.Services
 @using ECommerceSystemBl.Components.Pages.ProductComponents
+@using MudBlazor
+
 @inject ProductService ProductService
 
 <MudContainer MaxWidth="MaxWidth.Large">
@@ -13,17 +16,51 @@
 
     </MudText>
 
-    <ProductGrid Products="products" />
+    <MudTextField @bind-Value="searchText"
+                  Label="Search Products"
+                  Placeholder="Search by product name..."
+                  Variant="Variant.Outlined"
+                  Immediate="true"
+                  Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Filled.Search"
+                  Class="mb-4" />
+
+    <ProductGrid Products="FilteredProducts" />
 
 </MudContainer>
 
-@code{
+@code {
+
+    [SupplyParameterFromQuery]
+    public int? Category { get; set; }
 
     private List<ProductOutputDTO> products = new();
 
-    protected override void OnInitialized()
+    private string searchText = "";
+
+    private List<ProductOutputDTO> FilteredProducts =>
+        string.IsNullOrWhiteSpace(searchText)
+            ? products
+            : products
+                .Where(p => p.ProductName.Contains(
+                    searchText,
+                    StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+    protected override void OnParametersSet()
     {
-        products = ProductService.GetAllProducts();
+        var allProducts = ProductService.GetAllProducts();
+
+        if (Category.HasValue)
+        {
+            products = allProducts
+                .Where(p => p.CategoryId == Category.Value)
+                .ToList();
+        }
+        else
+        {
+            products = allProducts;
+        }
     }
 
 }

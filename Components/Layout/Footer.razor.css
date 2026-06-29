@@ -1,0 +1,10 @@
+﻿.footer {
+    margin-top: 70px;
+    padding: 30px 0;
+    background: #F8F4EE;
+    color: #5D4037;
+}
+
+    .footer .mud-chip {
+        border-radius: 20px;
+    }

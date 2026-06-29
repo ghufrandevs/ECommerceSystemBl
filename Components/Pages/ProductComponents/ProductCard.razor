@@ -1,32 +1,64 @@
 ﻿@using ECommerceSystemBl.DTOs
 @inject NavigationManager Navigation
 
-<MudCard Class="pa-3"
-         Style="cursor:pointer"
+<MudCard Class="product-card"
          @onclick="OpenProduct">
+
+    @if (!string.IsNullOrWhiteSpace(Product.ImageUrl))
+    {
+        <MudCardMedia Image="@Product.ImageUrl"
+                      Height="240"
+                      Class="product-image" />
+    }
+    else
+    {
+        <MudCardMedia Image="/images/products/default.jpg"
+                      Height="240"
+                      Class="product-image" />
+    }
 
     <MudCardContent>
 
-        <MudText Typo="Typo.h6">
+        <MudText Typo="Typo.h6"
+                 Class="product-title">
+
             @Product.ProductName
+
         </MudText>
 
-        <MudText Typo="Typo.body2" Class="mb-2">
+        <MudText Typo="Typo.body2"
+                 Class="product-description">
+
             @Product.Description
+
         </MudText>
 
         <MudDivider Class="my-2" />
 
-        <MudText>
-            <b>Price:</b> OMR @Product.Price
-        </MudText>
+        <MudStack Row="true"
+                  Justify="Justify.SpaceBetween"
+                  AlignItems="AlignItems.Center">
 
-        <MudText>
-            <b>Stock:</b> @Product.Stock
-        </MudText>
+            <MudText Class="price">
 
-        <MudText>
-            <b>Rating:</b> ⭐ @Product.OverallRating
+                OMR @Product.Price
+
+            </MudText>
+
+            <MudChip T="string"
+                     Color="Color.Success"
+                     Variant="Variant.Outlined">
+
+                In Stock
+
+            </MudChip>
+
+        </MudStack>
+
+        <MudText Class="rating mt-3">
+
+            ⭐ @Product.OverallRating
+
         </MudText>
 
     </MudCardContent>
