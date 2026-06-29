@@ -1,72 +1,78 @@
 ﻿@page "/admin/products"
-
+@using ECommerceSystemBl.Helpers
+@using Microsoft.AspNetCore.Components.Authorization
 @using ECommerceSystemBl.DTOs
 @using ECommerceSystemBl.Services
-@using Microsoft.AspNetCore.Authorization
-@attribute [Authorize(Roles = "Admin")]
 
+
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject ProductService ProductService
 @inject NavigationManager Navigation
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="mt-8">
+@if (authorized)
+{
+    <MudContainer MaxWidth="MaxWidth.Large" Class="mt-8">
 
-    <MudStack Row="true"
-              Justify="Justify.SpaceBetween"
-              AlignItems="AlignItems.Center"
-              Class="mb-6">
+        <MudStack Row="true"
+                  Justify="Justify.SpaceBetween"
+                  AlignItems="AlignItems.Center"
+                  Class="mb-6">
 
-        <MudText Typo="Typo.h4">
+            <MudText Typo="Typo.h4">
+                📦 Manage Products
+            </MudText>
 
-            📦 Manage Products
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       OnClick="AddProduct">
 
-        </MudText>
+                + Add Product
 
-        <MudButton Variant="Variant.Filled"
-                   Color="Color.Primary"
-                   OnClick="AddProduct">
+            </MudButton>
 
-            + Add Product
+        </MudStack>
 
-        </MudButton>
+        <MudTextField @bind-Value="searchText"
+                      Label="Search Product"
+                      Variant="Variant.Outlined"
+                      Immediate="true"
+                      Class="mb-4" />
 
-    </MudStack>
+        <MudTable Items="FilteredProducts"
+                  Hover="true"
+                  Striped="true">
 
-    <MudTextField @bind-Value="searchText"
-                  Label="Search Product"
-                  Variant="Variant.Outlined"
-                  Immediate="true"
-                  Class="mb-4" />
+            <HeaderContent>
 
-    <MudTable Items="FilteredProducts">
+                <MudTh>Name</MudTh>
+                <MudTh>Price</MudTh>
+                <MudTh>Stock</MudTh>
+                <MudTh>Actions</MudTh>
 
-        <HeaderContent>
+            </HeaderContent>
 
-            <MudTh>Name</MudTh>
+            <RowTemplate>
 
-            <MudTh>Price</MudTh>
+                <MudTd>@context.ProductName</MudTd>
 
-            <MudTh>Stock</MudTh>
+                <MudTd>
+                    OMR @context.Price
+                </MudTd>
 
-            <MudTh></MudTh>
+                <MudTd>
+                    @context.Stock
+                </MudTd>
 
-        </HeaderContent>
+                <MudTd>
 
-        <RowTemplate>
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Primary"
+                               OnClick="@(() => EditProduct(context.ProductId))">
 
-            <MudTd>@context.ProductName</MudTd>
+                        Edit
 
-            <MudTd>OMR @context.Price</MudTd>
-
-            <MudTd>@context.Stock</MudTd>
-
-            <MudTd>
-
-                <MudButton Variant="Variant.Text"
-                           Color="Color.Primary"
-                           OnClick="@(() => EditProduct(context.ProductId))">
-
-                    Edit
-                </MudButton>
+                    </MudButton>
 
                     <MudButton Variant="Variant.Text"
                                Color="Color.Error"
@@ -76,15 +82,18 @@
 
                     </MudButton>
 
-            </MudTd>
+                </MudTd>
 
-        </RowTemplate>
+            </RowTemplate>
 
-    </MudTable>
+        </MudTable>
 
-</MudContainer>
+    </MudContainer>
+}
 
-@code {
+@code
+{
+    private bool authorized = false;
 
     private List<ProductOutputDTO> products = new();
 
@@ -94,11 +103,19 @@
         string.IsNullOrWhiteSpace(searchText)
             ? products
             : products.Where(p =>
-                p.ProductName.Contains(searchText,
-                StringComparison.OrdinalIgnoreCase));
+                p.ProductName.Contains(
+                    searchText,
+                    StringComparison.OrdinalIgnoreCase));
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        authorized = await AdminAuthorizationHelper.IsAdminAsync(
+            AuthenticationStateProvider,
+            Navigation);
+
+        if (!authorized)
+            return;
+
         products = ProductService.GetAllProducts();
     }
 
@@ -120,5 +137,4 @@
 
         StateHasChanged();
     }
-
 }

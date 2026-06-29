@@ -11,14 +11,15 @@ namespace ECommerceSystemBl.DTOs
         [EmailAddress]
         public string UserEmail { get; set; }
 
-        [Required]
-        [RegularExpression(@"^(?=.*[A-Z])(?=.*\d).{8,}$")]
-        public string UserPassword { get; set; }
+        [RegularExpression(
+            @"^(?=.*[A-Z])(?=.*\d).{8,}$",
+            ErrorMessage = "Password must contain at least one uppercase letter and one number.")]
+        public string? UserPassword { get; set; }
 
         [Required]
         public string UserPhone { get; set; }
 
-        public string Role { get; set; }
+        public string Role { get; set; } = "";
 
         public bool IsActive { get; set; }
     }

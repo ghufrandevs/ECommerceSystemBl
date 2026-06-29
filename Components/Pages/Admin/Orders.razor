@@ -1,0 +1,89 @@
+﻿@page "/admin/orders"
+
+@using ECommerceSystemBl.Helpers
+@using Microsoft.AspNetCore.Components.Authorization
+@using ECommerceSystemBl.Models
+@using ECommerceSystemBl.Services
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject OrderService OrderService
+@inject NavigationManager Navigation
+
+@if (authorized)
+{
+    <MudContainer MaxWidth="MaxWidth.Large" Class="mt-6">
+
+        <MudText Typo="Typo.h4" Class="mb-4">
+            Orders Management
+        </MudText>
+
+        <MudTable Items="orders"
+                  Hover="true"
+                  Striped="true">
+
+            <HeaderContent>
+
+                <MudTh>Order ID</MudTh>
+                <MudTh>User ID</MudTh>
+                <MudTh>Order Date</MudTh>
+                <MudTh>Total</MudTh>
+                <MudTh>Action</MudTh>
+
+            </HeaderContent>
+
+            <RowTemplate>
+
+                <MudTd>@context.OrderId</MudTd>
+
+                <MudTd>@context.UserId</MudTd>
+
+                <MudTd>
+                    @context.OrderDate.ToString("dd/MM/yyyy")
+                </MudTd>
+
+                <MudTd>
+                    OMR @context.TotalAmount
+                </MudTd>
+
+                <MudTd>
+
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               OnClick="@(() => ViewOrder(context.OrderId))">
+
+                        View
+
+                    </MudButton>
+
+                </MudTd>
+
+            </RowTemplate>
+
+        </MudTable>
+
+    </MudContainer>
+}
+
+@code
+{
+    private bool authorized = false;
+
+    private List<Order> orders = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        authorized = await AdminAuthorizationHelper.IsAdminAsync(
+            AuthenticationStateProvider,
+            Navigation);
+
+        if (!authorized)
+            return;
+
+        orders = OrderService.GetAllOrders();
+    }
+
+    private void ViewOrder(int orderId)
+    {
+        Navigation.NavigateTo($"/admin/orders/{orderId}");
+    }
+}

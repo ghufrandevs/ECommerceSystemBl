@@ -1,0 +1,42 @@
+﻿.category-section {
+    margin-top: 80px;
+}
+
+    .category-section h2 {
+        font-size: 38px;
+        font-weight: bold;
+    }
+
+    .category-section p {
+        color: gray;
+        margin-bottom: 35px;
+    }
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+    gap: 25px;
+}
+
+.category-card {
+    background: #F8F4EE;
+    padding: 35px;
+    border-radius: 18px;
+    cursor: pointer;
+    transition: .25s;
+}
+
+    .category-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 8px 25px rgba(0,0,0,.08);
+    }
+
+    .category-card h3 {
+        margin-bottom: 15px;
+        font-size: 22px;
+    }
+
+    .category-card span {
+        color: #8B6A4F;
+        font-weight: 600;
+    }

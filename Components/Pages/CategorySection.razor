@@ -1,0 +1,47 @@
+﻿@using ECommerceSystemBl.DTOs.Category
+@using ECommerceSystemBl.Services
+
+@inject CategoryService CategoryService
+@inject NavigationManager Navigation
+
+<section class="category-section">
+
+    <h2>Shop by Category</h2>
+
+    <p>
+        Find products faster by browsing our categories.
+    </p>
+
+    <div class="category-grid">
+
+        @foreach (var category in categories)
+        {
+            <div class="category-card"
+                 @onclick="@(() => OpenCategory(category.CategoryId))">
+
+                <h3>@category.CategoryName</h3>
+
+                <span>Explore →</span>
+
+            </div>
+        }
+
+    </div>
+
+</section>
+
+@code {
+
+    private List<CategoryOutputDTO> categories = new();
+
+    protected override void OnInitialized()
+    {
+        categories = CategoryService.GetAll();
+    }
+
+    private void OpenCategory(int id)
+    {
+        Navigation.NavigateTo($"/products?category={id}");
+    }
+
+}

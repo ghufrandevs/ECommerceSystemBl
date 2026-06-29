@@ -1,6 +1,13 @@
 ﻿@using MudBlazor
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
 
-<MudAppBar Elevation="1" Color="Color.Surface">
+@implements IDisposable
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<MudAppBar Elevation="2"
+           Class="main-navbar">
 
     <MudText Typo="Typo.h5"
              Class="ms-2 fw-bold">
@@ -13,7 +20,7 @@
 
     <MudButton Href="/"
                Variant="Variant.Text"
-               Color="Color.Default">
+               Color="Color.Inherit">
 
         Home
 
@@ -21,7 +28,7 @@
 
     <MudButton Href="/products"
                Variant="Variant.Text"
-               Color="Color.Default">
+               Color="Color.Inherit">
 
         Products
 
@@ -29,41 +36,113 @@
 
     <MudButton Href="/categories"
                Variant="Variant.Text"
-               Color="Color.Default">
+               Color="Color.Inherit">
 
         Categories
 
     </MudButton>
 
+    @if (isAuthenticated && !isAdmin)
+    {
+        <MudButton Href="/my-orders"
+                   Variant="Variant.Text"
+                   Color="Color.Inherit">
+
+            My Orders
+
+        </MudButton>
+
+        <MudButton Href="/profile"
+                   Variant="Variant.Text"
+                   Color="Color.Inherit"
+                   StartIcon="@Icons.Material.Filled.Person">
+
+            My Profile
+
+        </MudButton>
+    }
+
+    @if (isAuthenticated && isAdmin)
+    {
+        <MudButton Href="/admin/dashboard"
+                   Variant="Variant.Text"
+                   Color="Color.Inherit">
+
+            Dashboard
+
+        </MudButton>
+    }
+
     <MudSpacer />
 
-    <MudButton Href="/login"
-               Variant="Variant.Outlined">
+    @if (!isAuthenticated)
+    {
+        <MudButton Href="/login"
+                   Variant="Variant.Outlined"
+                   Color="Color.Inherit">
 
-        Login
+            Login
 
-    </MudButton>
+        </MudButton>
 
-    <MudButton Href="/logout"
-               Variant="Variant.Text"
-               Color="Color.Error"
-               StartIcon="@Icons.Material.Filled.Logout">
+        <MudButton Href="/register"
+                   Variant="Variant.Outlined"
+                   Color="Color.Inherit"
+                   Class="ms-2">
 
-        Logout
+            Register
 
-    </MudButton>
+        </MudButton>
+    }
 
+    @if (isAuthenticated)
+    {
+        <MudButton Href="/logout"
+                   Variant="Variant.Text"
+                   Color="Color.Error"
+                   StartIcon="@Icons.Material.Filled.Logout">
 
+            Logout
 
-
-    <MudButton Href="/register"
-               Variant="Variant.Filled"
-               Color="Color.Primary"
-               Class="ms-2">
-
-        Register
-
-    </MudButton>
-
+        </MudButton>
+    }
 
 </MudAppBar>
+
+@code
+{
+    private bool isAuthenticated;
+
+    private bool isAdmin;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AuthenticationStateProvider.AuthenticationStateChanged += AuthenticationStateChanged;
+
+        await LoadUser();
+    }
+
+    private async Task LoadUser()
+    {
+        var authState =
+            await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        var user = authState.User;
+
+        isAuthenticated = user.Identity?.IsAuthenticated == true;
+
+        isAdmin = user.IsInRole("Admin");
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async void AuthenticationStateChanged(Task<AuthenticationState> task)
+    {
+        await LoadUser();
+    }
+
+    public void Dispose()
+    {
+        AuthenticationStateProvider.AuthenticationStateChanged -= AuthenticationStateChanged;
+    }
+}

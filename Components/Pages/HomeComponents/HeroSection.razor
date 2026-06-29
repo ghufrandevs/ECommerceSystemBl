@@ -1,41 +1,40 @@
-﻿@using MudBlazor
+﻿@inject NavigationManager Navigation
 
-<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-10 mb-10">
+<section class="hero">
 
-    <MudGrid>
+    <div class="hero-overlay">
 
-        <MudItem xs="12" md="6">
+        <span class="hero-badge">
+            Welcome to Commerce Shop
+        </span>
 
-            <MudText Typo="Typo.h2" Class="mb-4">
+        <h1>
+            Shop Smarter,<br />
+            Live Better.
+        </h1>
 
-                Electronics For Everyone
+        <p>
+            Discover quality products, browse categories,
+            and enjoy a smooth shopping experience all in one place.
+        </p>
 
-            </MudText>
+        <MudButton Variant="Variant.Filled"
+                   Class="hero-btn"
+                   Size="Size.Large"
+                   OnClick="GoProducts">
 
-            <MudText Typo="Typo.subtitle1"
-                     Class="mb-6">
+            Explore Products
 
-                Shop laptops, monitors, keyboards, headphones and accessories with modern technology and great prices.
+        </MudButton>
 
-            </MudText>
+    </div>
 
-            <MudButton Variant="Variant.Filled"
-                       Color="Color.Primary"
-                       Size="Size.Large">
+</section>
 
-                Shop Now
-
-            </MudButton>
-
-        </MudItem>
-
-        <MudItem xs="12" md="6">
-
-            <MudImage Src="Images/hero.png"
-                      Fluid="true" />
-
-        </MudItem>
-
-    </MudGrid>
-
-</MudContainer>
+@code
+{
+    private void GoProducts()
+    {
+        Navigation.NavigateTo("/products");
+    }
+}

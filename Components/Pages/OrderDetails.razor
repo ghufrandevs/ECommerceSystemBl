@@ -1,5 +1,5 @@
 ﻿@page "/orders/{id:int}"
-
+@page "/admin/orders/{id:int}"
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
 
@@ -80,6 +80,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        bool isAdminPage =
+    Navigation.Uri.Contains("/admin/orders/");
         var authState =
             await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
@@ -90,17 +92,26 @@
             int userId = int.Parse(
                 user.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-            var result = OrderService.GetOrderDetails(id, userId);
-
-            if (result is string error)
+            if (isAdminPage)
             {
-                errorMessage = error;
+                orderDetails = OrderService.GetOrderDetailsForAdmin(id);
+
+                orderTotal = orderDetails.Sum(x => x.Price * x.Quantity);
             }
             else
             {
-                orderDetails = (List<OrderDetailsDTO>)result;
+                var result = OrderService.GetOrderDetails(id, userId);
 
-                orderTotal = orderDetails.Sum(x => x.Price * x.Quantity);
+                if (result is string error)
+                {
+                    errorMessage = error;
+                }
+                else
+                {
+                    orderDetails = (List<OrderDetailsDTO>)result;
+
+                    orderTotal = orderDetails.Sum(x => x.Price * x.Quantity);
+                }
             }
         }
         else
@@ -111,6 +122,13 @@
 
     private void Back()
     {
-        Navigation.NavigateTo("/my-orders");
+        if (Navigation.Uri.Contains("/admin/orders/"))
+        {
+            Navigation.NavigateTo("/admin/orders");
+        }
+        else
+        {
+            Navigation.NavigateTo("/my-orders");
+        }
     }
 }

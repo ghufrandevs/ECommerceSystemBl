@@ -1,0 +1,128 @@
+﻿@page "/profile/edit"
+
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using ECommerceSystemBl.DTOs
+@using ECommerceSystemBl.Services
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserService UserService
+@inject NavigationManager Navigation
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+
+    <MudPaper Elevation="4" Class="pa-6">
+
+        <MudText Typo="Typo.h4" Class="mb-4">
+            Edit Profile
+        </MudText>
+
+        <MudTextField Label="Name"
+                      @bind-Value="user.UserName"
+                      Variant="Variant.Outlined"
+                      Class="mb-3" />
+
+        <MudTextField Label="Email"
+                      @bind-Value="user.UserEmail"
+                      Variant="Variant.Outlined"
+                      Class="mb-3" />
+
+        <MudTextField Label="Phone"
+                      @bind-Value="user.UserPhone"
+                      Variant="Variant.Outlined"
+                      Class="mb-3" />
+
+        <MudTextField Label="New Password (Optional)"
+                      @bind-Value="user.UserPassword"
+                      InputType="InputType.Password"
+                      Variant="Variant.Outlined"
+                      Class="mb-4" />
+
+        <MudStack Row="true"
+                  Spacing="2">
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       OnClick="Save">
+
+                Save
+
+            </MudButton>
+
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Secondary"
+                       OnClick="Cancel">
+
+                Cancel
+
+            </MudButton>
+
+        </MudStack>
+
+        @if (!string.IsNullOrWhiteSpace(message))
+        {
+            <MudAlert Severity="Severity.Success"
+                      Class="mt-4">
+
+                @message
+
+            </MudAlert>
+        }
+
+    </MudPaper>
+
+</MudContainer>
+
+@code
+{
+    private UserUpdateDTO user = new();
+
+    private int userId;
+
+    private string message = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState =
+            await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        var currentUser = authState.User;
+
+        if (currentUser.Identity?.IsAuthenticated != true)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        userId = int.Parse(
+            currentUser.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        var existingUser = UserService.GetUserById(userId);
+
+        if (existingUser != null)
+        {
+            user.UserName = existingUser.UserName;
+            user.UserEmail = existingUser.UserEmail;
+            user.UserPhone = existingUser.UserPhone;
+        }
+    }
+
+    private void Save()
+    {
+        message = UserService.UpdateUser(
+            userId,
+            user,
+            userId,
+            false);
+
+        if (message == "User Updated Successfully")
+        {
+            Navigation.NavigateTo("/profile");
+        }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/profile");
+    }
+}

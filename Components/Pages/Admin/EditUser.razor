@@ -1,119 +1,126 @@
-﻿@page "/admin/edit-user/{id:int}"
+﻿@page "/admin/users/edit/{id:int}"
 
+@using ECommerceSystemBl.Helpers
+@using Microsoft.AspNetCore.Components.Authorization
 @using ECommerceSystemBl.DTOs
 @using ECommerceSystemBl.Services
 @using MudBlazor
 
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserService UserService
 @inject NavigationManager Navigation
 
-<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-8">
+@if (authorized)
+{
+    <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-8">
 
-    <MudPaper Elevation="4" Class="pa-6 rounded-lg">
+        <MudPaper Elevation="4" Class="pa-6 rounded-lg">
 
-        <MudText Typo="Typo.h4">
-            ✏️ Edit User
-        </MudText>
+            <MudText Typo="Typo.h4">
+                ✏️ Edit User
+            </MudText>
 
-        <MudText Typo="Typo.body2"
-                 Color="Color.Secondary"
-                 Class="mb-4">
+            <MudText Typo="Typo.body2"
+                     Color="Color.Secondary"
+                     Class="mb-4">
 
-            Update user information.
+                Update user information.
 
-        </MudText>
+            </MudText>
 
-        <MudTextField @bind-Value="user.UserName"
-                      Label="User Name"
-                      Variant="Variant.Outlined"
-                      Required="true"
-                      Class="mb-3" />
+            <MudTextField @bind-Value="user.UserName"
+                          Label="User Name"
+                          Variant="Variant.Outlined"
+                          Required="true"
+                          Class="mb-3" />
 
-        <MudTextField @bind-Value="user.UserEmail"
-                      Label="Email"
-                      Variant="Variant.Outlined"
-                      Required="true"
-                      Class="mb-3" />
+            <MudTextField @bind-Value="user.UserEmail"
+                          Label="Email"
+                          Variant="Variant.Outlined"
+                          Required="true"
+                          Class="mb-3" />
 
-        <MudTextField @bind-Value="user.UserPassword"
-                      Label="Password"
-                      InputType="InputType.Password"
-                      Variant="Variant.Outlined"
-                      Required="true"
-                      Class="mb-3" />
+            <MudTextField @bind-Value="user.UserPhone"
+                          Label="Phone"
+                          Variant="Variant.Outlined"
+                          Required="true"
+                          Class="mb-3" />
 
-        <MudTextField @bind-Value="user.UserPhone"
-                      Label="Phone"
-                      Variant="Variant.Outlined"
-                      Required="true"
-                      Class="mb-3" />
+            <MudSelect T="string"
+                       @bind-Value="user.Role"
+                       Label="Role"
+                       Variant="Variant.Outlined"
+                       Class="mb-3">
 
-        <MudSelect T="string"
-                   @bind-Value="user.Role"
-                   Label="Role"
-                   Variant="Variant.Outlined"
-                   Class="mb-3">
+                <MudSelectItem Value="@("Admin")">Admin</MudSelectItem>
+                <MudSelectItem Value="@("Customer")">Customer</MudSelectItem>
 
-            <MudSelectItem Value="@("Admin")">Admin</MudSelectItem>
+            </MudSelect>
 
-            <MudSelectItem Value="@("Customer")">Customer</MudSelectItem>
+            <MudSwitch @bind-Value="user.IsActive"
+                       Color="Color.Success">
 
-        </MudSelect>
+                Active Account
 
-        <MudSwitch @bind-Value="user.IsActive"
-                   Color="Color.Success">
+            </MudSwitch>
 
-            Active Account
+            <MudStack Row="true"
+                      Justify="Justify.SpaceBetween"
+                      Class="mt-6">
 
-        </MudSwitch>
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Secondary"
+                           OnClick="Cancel">
 
-        <MudStack Row="true"
-                  Justify="Justify.SpaceBetween"
-                  Class="mt-6">
+                    Cancel
 
-            <MudButton Variant="Variant.Outlined"
-                       Color="Color.Secondary"
-                       OnClick="Cancel">
+                </MudButton>
 
-                Cancel
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           OnClick="UpdateUser">
 
-            </MudButton>
+                    Update User
 
-            <MudButton Variant="Variant.Filled"
-                       Color="Color.Primary"
-                       OnClick="UpdateUser">
+                </MudButton>
 
-                Update User
+            </MudStack>
 
-            </MudButton>
+            @if (!string.IsNullOrWhiteSpace(message))
+            {
+                <MudAlert Severity="Severity.Success"
+                          Class="mt-4">
 
-        </MudStack>
+                    @message
 
-        @if (!string.IsNullOrWhiteSpace(message))
-        {
-            <MudAlert Severity="Severity.Success"
-                      Class="mt-4">
+                </MudAlert>
+            }
 
-                @message
+        </MudPaper>
 
-            </MudAlert>
-        }
-
-    </MudPaper>
-
-</MudContainer>
+    </MudContainer>
+}
 
 @code {
 
     [Parameter]
     public int id { get; set; }
 
+    private bool authorized = false;
+
     private UserUpdateDTO user = new();
 
     private string message = "";
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        authorized = await AdminAuthorizationHelper.IsAdminAsync(
+            AuthenticationStateProvider,
+            Navigation);
+
+        if (!authorized)
+            return;
+
         var existingUser = UserService.GetUserById(id);
 
         if (existingUser != null)
@@ -121,10 +128,8 @@
             user.UserName = existingUser.UserName;
             user.UserEmail = existingUser.UserEmail;
             user.UserPhone = existingUser.UserPhone;
-
-            user.Role = "Customer";
-
-            user.IsActive = true;
+            user.Role = existingUser.Role;
+            user.IsActive = existingUser.IsActive;
         }
     }
 
@@ -146,5 +151,4 @@
     {
         Navigation.NavigateTo("/admin/users");
     }
-
 }

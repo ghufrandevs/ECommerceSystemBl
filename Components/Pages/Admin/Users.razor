@@ -1,67 +1,72 @@
-﻿@page "/admin/users"
-
+﻿@using ECommerceSystemBl.Helpers
+@using Microsoft.AspNetCore.Components.Authorization
 @using ECommerceSystemBl.DTOs
 @using ECommerceSystemBl.Services
+@page "/admin/users"
 
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject UserService UserService
 @inject NavigationManager Navigation
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="mt-8">
+@if (authorized)
+{
+    <MudContainer MaxWidth="MaxWidth.Large" Class="mt-8">
 
-    <MudStack Row="true"
-              Justify="Justify.SpaceBetween"
-              AlignItems="AlignItems.Center"
-              Class="mb-6">
+        <MudStack Row="true"
+        Justify="Justify.SpaceBetween"
+        AlignItems="AlignItems.Center"
+        Class="mb-6">
 
-        <MudText Typo="Typo.h4">
-            👥 Manage Users
-        </MudText>
+            <MudText Typo="Typo.h4">
+                👥 Manage Users
+            </MudText>
 
-    </MudStack>
+        </MudStack>
 
-    <MudTextField @bind-Value="searchText"
-                  Label="Search User"
-                  Variant="Variant.Outlined"
-                  Immediate="true"
-                  Class="mb-4" />
+        <MudTextField @bind-Value="searchText"
+        Label="Search User"
+        Variant="Variant.Outlined"
+        Immediate="true"
+        Class="mb-4" />
 
-    <MudTable Items="FilteredUsers" Hover="true" Striped="true">
+        <MudTable Items="FilteredUsers" Hover="true" Striped="true">
 
-        <HeaderContent>
+            <HeaderContent>
 
-            <MudTh>Name</MudTh>
-            <MudTh>Email</MudTh>
-            <MudTh>Phone</MudTh>
-            <MudTh></MudTh>
+                <MudTh>Name</MudTh>
+                <MudTh>Email</MudTh>
+                <MudTh>Phone</MudTh>
+                <MudTh></MudTh>
 
-        </HeaderContent>
+            </HeaderContent>
 
-        <RowTemplate>
+            <RowTemplate>
 
-            <MudTd>@context.UserName</MudTd>
+                <MudTd>@context.UserName</MudTd>
 
-            <MudTd>@context.UserEmail</MudTd>
+                <MudTd>@context.UserEmail</MudTd>
 
-            <MudTd>@context.UserPhone</MudTd>
+                <MudTd>@context.UserPhone</MudTd>
 
-            <MudTd>
+                <MudTd>
 
-                <MudButton Variant="Variant.Text"
-                           Color="Color.Primary"
-                           OnClick="@(() => EditUser(context.UserId))">
+                    <MudButton Variant="Variant.Text"
+                    Color="Color.Primary"
+                    OnClick="@(() => EditUser(context.UserId))">
 
-                    Edit
+                        Edit
 
-                </MudButton>
+                    </MudButton>
 
-            </MudTd>
+                </MudTd>
 
-        </RowTemplate>
+            </RowTemplate>
 
-    </MudTable>
+        </MudTable>
 
-</MudContainer>
-
+    </MudContainer>
+}
 @code
 {
     private List<UserOutputDTO> users = new();
@@ -77,13 +82,21 @@
                 || u.UserEmail.Contains(searchText,
                     StringComparison.OrdinalIgnoreCase));
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        authorized = await AdminAuthorizationHelper.IsAdminAsync(
+            AuthenticationStateProvider,
+            Navigation);
+
+        if (!authorized)
+            return;
+
         users = UserService.GetAllUsers();
     }
 
     private void EditUser(int id)
     {
-        Navigation.NavigateTo($"/admin/edit-user/{id}");
+        Navigation.NavigateTo($"/admin/users/edit/{id}");
     }
+    private bool authorized = false;
 }

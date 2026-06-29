@@ -43,7 +43,7 @@ namespace ECommerceSystemBl
             builder.Services.AddScoped<PasswordService>();
             builder.Services.AddScoped<JwtService>();
             builder.Services.AddScoped<EmailService>();
-
+            builder.Services.AddScoped<CartService>();
             builder.Services.AddAuthorizationCore();
 
             builder.Services.AddScoped<CustomAuthenticationStateProvider>();

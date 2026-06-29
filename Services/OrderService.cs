@@ -33,6 +33,11 @@ namespace ECommerceSystemBl.Services
             return _orderRepository.GetUserOrders(userId);
         }
 
+        public List<OrderDetailsDTO> GetOrderDetailsForAdmin(int orderId)
+        {
+            return _orderRepository.GetOrderDetails(orderId);
+        }
+
         public object GetOrderDetails(int orderId, int userId)
         {
             var order = _orderRepository.GetById(orderId);

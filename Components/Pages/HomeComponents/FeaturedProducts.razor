@@ -1,0 +1,33 @@
+﻿@using ECommerceSystemBl.DTOs
+@using ECommerceSystemBl.Services
+
+@inject ProductService ProductService
+
+<section class="featured-section">
+
+    <MudText Typo="Typo.h4" Class="mb-2">
+        Featured Products
+    </MudText>
+
+    <MudText Typo="Typo.body1"
+             Color="Color.Secondary"
+             Class="mb-6">
+
+        Discover our latest products.
+
+    </MudText>
+
+    <ProductGrid Products="products"/>
+
+</section>
+
+@code{
+
+    private List<ProductOutputDTO> products = new();
+
+    protected override void OnInitialized()
+    {
+        products = ProductService.GetAllProducts();
+    }
+
+}

@@ -1,137 +1,199 @@
 ﻿@page "/admin/dashboard"
+@using ECommerceSystemBl.Helpers
+@using Microsoft.AspNetCore.Components.Authorization
 
+@using System.Security.Claims
+@using ECommerceSystemBl.Services
+
+
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager Navigation
+@inject ProductService ProductService
+@inject CategoryService CategoryService
+@inject UserService UserService
+@inject OrderService OrderService
+@if (authorized)
+{
 
-<MudContainer MaxWidth="MaxWidth.Large" Class="mt-8">
+    <MudContainer MaxWidth="MaxWidth.Large" Class="mt-8">
 
-    <MudText Typo="Typo.h3">
-        👋 Welcome Admin
-    </MudText>
+        <MudText Typo="Typo.h3">
+            👋 Welcome Admin
+        </MudText>
 
-    <MudText Typo="Typo.body1"
-             Color="Color.Secondary"
-             Class="mb-6">
+        <MudText Typo="Typo.body1"
+        Color="Color.Secondary"
+        Class="mb-6">
 
-        Manage your e-commerce system from one place.
+            Manage your e-commerce system from one place.
 
-    </MudText>
+        </MudText>
 
-    <MudGrid>
+        <MudGrid>
 
-        <MudItem xs="12" md="4">
+            <!-- Products -->
 
-            <MudCard Elevation="4" Class="pa-4">
+            <MudItem xs="12" md="3">
 
-                <MudCardContent>
+                <MudCard Elevation="4" Class="pa-4">
 
-                    <MudText Typo="Typo.h5">
+                    <MudCardContent>
 
-                        📦 Products
+                        <MudText Typo="Typo.h5">
+                            📦 Products
+                        </MudText>
 
-                    </MudText>
+                        <MudText Class="mt-2">
+                            Total Products: <b>@productCount</b>
+                        </MudText>
 
-                    <MudText Class="mt-2">
+                    </MudCardContent>
 
-                        Add, edit, delete and manage products.
+                    <MudCardActions>
 
-                    </MudText>
+                        <MudButton Variant="Variant.Filled"
+                        Color="Color.Primary"
+                        OnClick="OpenProducts">
 
-                </MudCardContent>
+                            Open
 
-                <MudCardActions>
+                        </MudButton>
 
-                    <MudButton Variant="Variant.Filled"
-                               Color="Color.Primary"
-                               OnClick="OpenProducts">
+                    </MudCardActions>
 
-                        Open
+                </MudCard>
 
-                    </MudButton>
+            </MudItem>
 
-                </MudCardActions>
+            <!-- Categories -->
 
-            </MudCard>
+            <MudItem xs="12" md="3">
 
-        </MudItem>
+                <MudCard Elevation="4" Class="pa-4">
 
-        <MudItem xs="12" md="4">
+                    <MudCardContent>
 
-            <MudCard Elevation="4" Class="pa-4">
+                        <MudText Typo="Typo.h5">
+                            📂 Categories
+                        </MudText>
 
-                <MudCardContent>
+                        <MudText Class="mt-2">
+                            Total Categories: <b>@categoryCount</b>
+                        </MudText>
 
-                    <MudText Typo="Typo.h5">
+                    </MudCardContent>
 
-                        📂 Categories
+                    <MudCardActions>
 
-                    </MudText>
+                        <MudButton Variant="Variant.Filled"
+                        Color="Color.Primary"
+                        OnClick="OpenCategories">
 
-                    <MudText Class="mt-2">
+                            Open
 
-                        Manage product categories.
+                        </MudButton>
 
-                    </MudText>
+                    </MudCardActions>
 
-                </MudCardContent>
+                </MudCard>
 
-                <MudCardActions>
+            </MudItem>
 
-                    <MudButton Variant="Variant.Filled"
-                               Color="Color.Primary"
-                               OnClick="OpenCategories">
+            <!-- Users -->
 
-                        Open
+            <MudItem xs="12" md="3">
 
-                    </MudButton>
+                <MudCard Elevation="4" Class="pa-4">
 
-                </MudCardActions>
+                    <MudCardContent>
 
-            </MudCard>
+                        <MudText Typo="Typo.h5">
+                            👥 Users
+                        </MudText>
 
-        </MudItem>
+                        <MudText Class="mt-2">
+                            Total Users: <b>@userCount</b>
+                        </MudText>
 
-        <MudItem xs="12" md="4">
+                    </MudCardContent>
 
-            <MudCard Elevation="4" Class="pa-4">
+                    <MudCardActions>
 
-                <MudCardContent>
+                        <MudButton Variant="Variant.Filled"
+                        Color="Color.Primary"
+                        OnClick="OpenUsers">
 
-                    <MudText Typo="Typo.h5">
+                            Open
 
-                        👥 Users
+                        </MudButton>
 
-                    </MudText>
+                    </MudCardActions>
 
-                    <MudText Class="mt-2">
+                </MudCard>
 
-                        View registered users.
+            </MudItem>
 
-                    </MudText>
+            <!-- Orders -->
 
-                </MudCardContent>
+            <MudItem xs="12" md="3">
 
-                <MudCardActions>
+                <MudCard Elevation="4" Class="pa-4">
 
-                    <MudButton Variant="Variant.Filled"
-                               Color="Color.Primary"
-                               OnClick="OpenUsers">
+                    <MudCardContent>
 
-                        Open
+                        <MudText Typo="Typo.h5">
+                            🛒 Orders
+                        </MudText>
 
-                    </MudButton>
+                        <MudText Class="mt-2">
+                            Total Orders: <b>@orderCount</b>
+                        </MudText>
 
-                </MudCardActions>
+                    </MudCardContent>
 
-            </MudCard>
+                    <MudCardActions>
 
-        </MudItem>
+                        <MudButton Variant="Variant.Filled"
+                        Color="Color.Primary"
+                        OnClick="OpenOrders">
 
-    </MudGrid>
+                            Open
 
-</MudContainer>
+                        </MudButton>
 
+                    </MudCardActions>
+
+                </MudCard>
+
+            </MudItem>
+
+        </MudGrid>
+
+    </MudContainer>
+}
 @code
 {
+    private int productCount;
+    private int categoryCount;
+    private int userCount;
+    private int orderCount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        authorized = await AdminAuthorizationHelper.IsAdminAsync(
+            AuthenticationStateProvider,
+            Navigation);
+
+        if (!authorized)
+            return;
+
+        productCount = ProductService.GetAllProducts().Count;
+        categoryCount = CategoryService.GetAll().Count;
+        userCount = UserService.GetAllUsers().Count;
+        orderCount = OrderService.GetAllOrders().Count;
+    }
+
     private void OpenProducts()
     {
         Navigation.NavigateTo("/admin/products");
@@ -146,4 +208,11 @@
     {
         Navigation.NavigateTo("/admin/users");
     }
+
+    private void OpenOrders()
+    {
+        Navigation.NavigateTo("/admin/orders");
+    }
+
+    private bool authorized = false;
 }

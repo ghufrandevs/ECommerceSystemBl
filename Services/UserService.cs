@@ -117,7 +117,9 @@ namespace ECommerceSystemBl.Services
                 UserId = user.UserId,
                 UserName = user.UserName,
                 UserEmail = user.UserEmail,
-                UserPhone = user.UserPhone
+                UserPhone = user.UserPhone,
+                Role = user.Role,
+                IsActive = user.IsActive
             };
         }
 
@@ -153,8 +155,11 @@ namespace ECommerceSystemBl.Services
 
             usr.UserName = dto.UserName;
             usr.UserEmail = dto.UserEmail;
-            usr.UserPassword =
-                _passwordService.HashPassword(dto.UserPassword);
+            if (!string.IsNullOrWhiteSpace(dto.UserPassword))
+            {
+                usr.UserPassword =
+                    _passwordService.HashPassword(dto.UserPassword);
+            }
 
             usr.UserPhone = dto.UserPhone;
 

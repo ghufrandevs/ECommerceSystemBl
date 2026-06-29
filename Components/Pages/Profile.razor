@@ -1,0 +1,90 @@
+﻿@page "/profile"
+
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using ECommerceSystemBl.DTOs
+@using ECommerceSystemBl.Services
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserService UserService
+@inject NavigationManager Navigation
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+
+    @if (user == null)
+    {
+        <MudAlert Severity="Severity.Warning">
+            User not found or not logged in.
+        </MudAlert>
+    }
+    else
+    {
+        <MudPaper Elevation="4" Class="pa-6">
+
+            <MudText Typo="Typo.h4" Class="mb-4">
+                My Profile
+            </MudText>
+
+            <MudText Class="mb-2">
+                <b>Name:</b> @user.UserName
+            </MudText>
+
+            <MudText Class="mb-2">
+                <b>Email:</b> @user.UserEmail
+            </MudText>
+
+            <MudText Class="mb-4">
+                <b>Phone:</b> @user.UserPhone
+            </MudText>
+
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       OnClick="EditProfile">
+
+                Edit Profile
+
+            </MudButton>
+
+        </MudPaper>
+    }
+
+</MudContainer>
+
+@code
+{
+    private UserOutputDTO? user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState =
+            await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        var currentUser = authState.User;
+
+        Console.WriteLine($"Authenticated: {currentUser.Identity?.IsAuthenticated}");
+
+        if (currentUser.Identity?.IsAuthenticated == true)
+        {
+            int userId = int.Parse(
+                currentUser.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+            Console.WriteLine($"UserId = {userId}");
+
+            user = UserService.GetUserById(userId);
+
+            if (user == null)
+            {
+                Console.WriteLine("User is NULL");
+            }
+            else
+            {
+                Console.WriteLine($"User Name = {user.UserName}");
+            }
+        }
+    }
+
+    private void EditProfile()
+    {
+        Navigation.NavigateTo("/profile/edit");
+    }
+}

@@ -46,9 +46,29 @@ else
                 <b>Stock:</b> @product.Stock
             </MudText>
 
-            <MudText Class="mb-4">
-                <b>Rating:</b> ⭐ @product.OverallRating
-            </MudText>
+            <MudStack Row="true"
+                      AlignItems="AlignItems.Center"
+                      Spacing="1"
+                      Class="mb-4">
+
+                <MudText>
+                    <b>Rating:</b>
+                </MudText>
+
+                <MudRating SelectedValue="@((int)Math.Round(product.OverallRating))"
+                           ReadOnly="true"
+                           MaxValue="5" />
+
+                <MudChip T="string"
+                         Color="Color.Warning"
+                         Variant="Variant.Outlined"
+                         Size="Size.Small">
+
+                    @product.OverallRating.ToString("0.0")
+
+                </MudChip>
+
+            </MudStack>
 
             <MudStack Row="true"
                       Spacing="2">
@@ -104,9 +124,24 @@ else
                             <b>@review.UserName</b>
                         </MudText>
 
-                        <MudText Typo="Typo.subtitle1">
-                            ⭐ @review.Rating / 5
-                        </MudText>
+                        <MudStack Row="true"
+                                  AlignItems="AlignItems.Center"
+                                  Spacing="1">
+
+                            <MudRating SelectedValue="@review.Rating"
+                                       ReadOnly="true"
+                                       MaxValue="5" />
+
+                            <MudChip T="string"
+                                     Color="Color.Warning"
+                                     Variant="Variant.Outlined"
+                                     Size="Size.Small">
+
+                                @review.Rating
+
+                            </MudChip>
+
+                        </MudStack>
 
                         <MudText Typo="Typo.body1">
                             @review.Comment
