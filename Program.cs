@@ -34,6 +34,7 @@ namespace ECommerceSystemBl
             builder.Services.AddScoped<OrderProductsRepository>();
 
             builder.Services.AddScoped<ProductService>();
+            builder.Services.AddSingleton<CartService>();
             builder.Services.AddScoped<CategoryService>();
             builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<OrderService>();
@@ -43,7 +44,6 @@ namespace ECommerceSystemBl
             builder.Services.AddScoped<PasswordService>();
             builder.Services.AddScoped<JwtService>();
             builder.Services.AddScoped<EmailService>();
-            builder.Services.AddScoped<CartService>();
             builder.Services.AddAuthorizationCore();
 
             builder.Services.AddScoped<CustomAuthenticationStateProvider>();

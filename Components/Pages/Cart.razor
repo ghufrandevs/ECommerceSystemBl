@@ -1,0 +1,177 @@
+﻿@page "/cart"
+
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using ECommerceSystemBl.DTOs.Cart
+@using ECommerceSystemBl.Services
+
+@inject CartService CartService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
+
+    <MudText Typo="Typo.h4" Class="mb-4">
+        Shopping Cart
+    </MudText>
+
+    @if (!cartItems.Any())
+    {
+        <MudAlert Severity="Severity.Info">
+            Your cart is empty.
+        </MudAlert>
+
+        <MudButton Href="/products"
+                   Variant="Variant.Outlined"
+                   Color="Color.Primary"
+                   Class="mt-3">
+
+            Continue Shopping
+
+        </MudButton>
+    }
+    else
+    {
+        @foreach (var item in cartItems)
+        {
+            <MudPaper Class="pa-4 mb-3">
+
+                <MudGrid AlignItems="AlignItems.Center">
+
+                    <MudItem xs="3">
+
+                        <MudImage Src="@item.ImageUrl"
+                                  Width="100"
+                                  Height="100" />
+
+                    </MudItem>
+
+                    <MudItem xs="9">
+
+                        <MudText Typo="Typo.h6">
+                            @item.ProductName
+                        </MudText>
+
+                        <MudText>
+                            Price : OMR @item.Price
+                        </MudText>
+
+                        <MudStack Row="true"
+                                  AlignItems="AlignItems.Center"
+                                  Spacing="1"
+                                  Class="mt-2 mb-2">
+
+                            <MudIconButton Icon="@Icons.Material.Filled.Remove"
+                                           Color="Color.Primary"
+                                           OnClick="@(() => Decrease(item.ProductId))" />
+
+                            <MudText Typo="Typo.h6">
+                                @item.Quantity
+                            </MudText>
+
+                            <MudIconButton Icon="@Icons.Material.Filled.Add"
+                                           Color="Color.Primary"
+                                           OnClick="@(() => Increase(item.ProductId))" />
+
+                        </MudStack>
+
+                        <MudText>
+                            Total : OMR @item.Total
+                        </MudText>
+
+                        <MudButton Variant="Variant.Text"
+                                   Color="Color.Error"
+                                   StartIcon="@Icons.Material.Filled.Delete"
+                                   OnClick="@(() => Remove(item.ProductId))">
+
+                            Remove
+
+                        </MudButton>
+
+                    </MudItem>
+
+                </MudGrid>
+
+            </MudPaper>
+        }
+
+        <MudDivider Class="my-4" />
+
+        <MudText Typo="Typo.h5">
+            Grand Total : OMR @cartItems.Sum(x => x.Total)
+        </MudText>
+
+        <MudStack Row="true"
+                  Spacing="2"
+                  Class="mt-4">
+
+            <MudButton Href="/products"
+                       Variant="Variant.Outlined"
+                       Color="Color.Primary">
+
+                Continue Shopping
+
+            </MudButton>
+
+            <MudButton Href="/checkout"
+                       Variant="Variant.Filled"
+                       Color="Color.Success">
+
+                Checkout
+
+            </MudButton>
+
+        </MudStack>
+    }
+
+</MudContainer>
+
+@code {
+
+    private List<CartItemDTO> cartItems = new();
+
+    private int userId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState =
+            await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated != true)
+            return;
+
+        userId = int.Parse(
+            user.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        cartItems = CartService.GetCartItems(userId);
+    }
+
+    private void Increase(int productId)
+    {
+        CartService.IncreaseQuantity(userId, productId);
+
+        cartItems = CartService.GetCartItems(userId);
+
+        StateHasChanged();
+    }
+
+    private void Decrease(int productId)
+    {
+        CartService.DecreaseQuantity(userId, productId);
+
+        cartItems = CartService.GetCartItems(userId);
+
+        StateHasChanged();
+    }
+
+    private void Remove(int productId)
+    {
+        CartService.RemoveItem(userId, productId);
+
+        cartItems = CartService.GetCartItems(userId);
+
+        StateHasChanged();
+    }
+
+}

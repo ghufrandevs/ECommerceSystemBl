@@ -1,7 +1,8 @@
 ﻿@using ECommerceSystemBl.DTOs
 @inject NavigationManager Navigation
 
-<MudCard Class="product-card"
+<MudCard Style="cursor:pointer;"
+         Class="product-card"
          @onclick="OpenProduct">
 
     @if (!string.IsNullOrWhiteSpace(Product.ImageUrl))

@@ -1,0 +1,116 @@
+﻿@page "/checkout"
+
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using ECommerceSystemBl.DTOs.Cart
+@using ECommerceSystemBl.Services
+@using ECommerceSystemBl.DTOs
+
+@inject ISnackbar Snackbar
+@inject CartService CartService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Navigation
+@inject OrderService OrderService
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-6">
+
+    <MudText Typo="Typo.h4">
+        Checkout
+    </MudText>
+
+    <MudDivider Class="my-4" />
+
+    @foreach (var item in cartItems)
+    {
+        <MudPaper Class="pa-3 mb-3">
+
+            <MudText Typo="Typo.h6">
+
+                @item.ProductName
+
+            </MudText>
+
+            <MudText>
+
+                Qty : @item.Quantity
+
+            </MudText>
+
+            <MudText>
+
+                Price : OMR @item.Price
+
+            </MudText>
+
+            <MudText>
+
+                Total : OMR @item.Total
+
+            </MudText>
+
+        </MudPaper>
+    }
+
+    <MudDivider Class="my-4" />
+
+    <MudText Typo="Typo.h5">
+
+        Grand Total : OMR @cartItems.Sum(x => x.Total)
+
+    </MudText>
+
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Success"
+               Class="mt-4"
+               OnClick="PlaceOrder">
+
+        Place Order
+
+    </MudButton>
+
+</MudContainer>
+
+@code {
+
+    private int userId;
+
+    private List<CartItemDTO> cartItems = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState =
+            await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        var user = authState.User;
+
+        userId = int.Parse(
+            user.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        cartItems = CartService.GetCartItems(userId);
+    }
+
+    private void PlaceOrder()
+    {
+        PlaceOrderDTO dto = new()
+        {
+            Items = cartItems.Select(x => new ItemDTO
+            {
+                ProductId = x.ProductId,
+                Quantity = x.Quantity
+            }).ToList()
+        };
+
+        var result = OrderService.PlaceOrder(dto, userId);
+
+        if (result is string message)
+        {
+            Snackbar.Add(message, Severity.Error);
+            return;
+        }
+
+        CartService.ClearCart(userId);
+
+        Navigation.NavigateTo("/my-orders");
+    }
+
+}

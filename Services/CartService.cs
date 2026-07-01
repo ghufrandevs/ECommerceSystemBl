@@ -1,55 +1,106 @@
-﻿using ECommerceSystemBl.DTOs;
+﻿using ECommerceSystemBl.DTOs.Cart;
 
 namespace ECommerceSystemBl.Services
 {
     public class CartService
     {
-        private readonly List<CartItemDTO> _cart = new();
+        public event Action? OnCartChanged;
+        private readonly Dictionary<int, List<CartItemDTO>> carts = new();
 
-        public List<CartItemDTO> GetCartItems()
+        public void AddToCart(int userId, CartItemDTO item)
         {
-            return _cart;
-        }
-
-        public void AddToCart(CartItemDTO item)
-        {
-            var existingItem = _cart.FirstOrDefault(x =>
-                x.ProductId == item.ProductId);
-
-            if (existingItem == null)
+            if (!carts.ContainsKey(userId))
             {
-                _cart.Add(item);
+                carts[userId] = new List<CartItemDTO>();
+            }
+
+            var cart = carts[userId];
+
+            var existingItem =
+                cart.FirstOrDefault(x => x.ProductId == item.ProductId);
+
+            if (existingItem != null)
+            {
+                existingItem.Quantity += item.Quantity;
+                OnCartChanged?.Invoke();
             }
             else
             {
-                existingItem.Quantity++;
+                cart.Add(item);
+                OnCartChanged?.Invoke();
             }
         }
 
-        public void RemoveFromCart(int productId)
+        public List<CartItemDTO> GetCartItems(int userId)
         {
-            var item = _cart.FirstOrDefault(x =>
-                x.ProductId == productId);
+            if (!carts.ContainsKey(userId))
+                return new List<CartItemDTO>();
+
+            return carts[userId];
+        }
+
+        public void ClearCart(int userId)
+        {
+            if (carts.ContainsKey(userId))
+            {
+                carts[userId].Clear();
+                OnCartChanged?.Invoke();
+            }
+        }
+        public void IncreaseQuantity(int userId, int productId)
+        {
+            if (!carts.ContainsKey(userId))
+                return;
+
+            var item = carts[userId]
+                .FirstOrDefault(x => x.ProductId == productId);
 
             if (item != null)
             {
-                _cart.Remove(item);
+                item.Quantity++;
+                OnCartChanged?.Invoke();
             }
         }
-
-        public void ClearCart()
+        public void DecreaseQuantity(int userId, int productId)
         {
-            _cart.Clear();
+            if (!carts.ContainsKey(userId))
+                return;
+
+            var item = carts[userId]
+                .FirstOrDefault(x => x.ProductId == productId);
+
+            if (item == null)
+                return;
+
+            item.Quantity--;
+
+            if (item.Quantity <= 0)
+            {
+                carts[userId].Remove(item);
+            }
+            OnCartChanged?.Invoke();
+
         }
-
-        public decimal GetTotalPrice()
+        public void RemoveItem(int userId, int productId)
         {
-            return _cart.Sum(x => x.Total);
+            if (!carts.ContainsKey(userId))
+                return;
+
+            var item = carts[userId]
+                .FirstOrDefault(x => x.ProductId == productId);
+
+            if (item != null)
+            {
+                carts[userId].Remove(item);
+                OnCartChanged?.Invoke();
+            }
         }
-
-        public int GetItemsCount()
+        public int GetCartCount(int userId)
         {
-            return _cart.Sum(x => x.Quantity);
+            if (!carts.ContainsKey(userId))
+                return 0;
+
+            return carts[userId].Sum(x => x.Quantity);
         }
     }
 }

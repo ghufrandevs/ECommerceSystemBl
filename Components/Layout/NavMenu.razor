@@ -1,9 +1,10 @@
 ﻿@using MudBlazor
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
+@using ECommerceSystemBl.Services
 
 @implements IDisposable
-
+@inject CartService CartService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
 <MudAppBar Elevation="2"
@@ -34,7 +35,37 @@
 
     </MudButton>
 
-    
+    @if (isAuthenticated && !isAdmin)
+    {
+        @if (cartCount > 0)
+        {
+            <MudBadge Content="@cartCount"
+                      Color="Color.Error"
+                      Overlap="true">
+
+                <MudButton Href="/cart"
+                           Variant="Variant.Text"
+                           Color="Color.Inherit"
+                           StartIcon="@Icons.Material.Filled.ShoppingCart">
+
+                    Cart
+
+                </MudButton>
+
+            </MudBadge>
+        }
+        else
+        {
+            <MudButton Href="/cart"
+                       Variant="Variant.Text"
+                       Color="Color.Inherit"
+                       StartIcon="@Icons.Material.Filled.ShoppingCart">
+
+                Cart
+
+            </MudButton>
+        }
+    }
 
     @if (isAuthenticated && !isAdmin)
     {
@@ -112,6 +143,7 @@
     protected override async Task OnInitializedAsync()
     {
         AuthenticationStateProvider.AuthenticationStateChanged += AuthenticationStateChanged;
+        CartService.OnCartChanged += CartChanged;
 
         await LoadUser();
     }
@@ -126,7 +158,17 @@
         isAuthenticated = user.Identity?.IsAuthenticated == true;
 
         isAdmin = user.IsInRole("Admin");
+        if (isAuthenticated && !isAdmin)
+        {
+            int userId = int.Parse(
+                user.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
+            cartCount = CartService.GetCartCount(userId);
+        }
+        else
+        {
+            cartCount = 0;
+        }
         await InvokeAsync(StateHasChanged);
     }
 
@@ -138,5 +180,13 @@
     public void Dispose()
     {
         AuthenticationStateProvider.AuthenticationStateChanged -= AuthenticationStateChanged;
+        CartService.OnCartChanged -= CartChanged;
+    }
+
+    private int cartCount;
+
+    private async void CartChanged()
+    {
+        await LoadUser();
     }
 }

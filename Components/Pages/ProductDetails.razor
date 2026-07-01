@@ -1,6 +1,7 @@
 ﻿@using System.Security.Claims
-@using Microsoft.AspNetCore.Components.Authorization
+@using ECommerceSystemBl.DTOs.Cart
 @using ECommerceSystemBl.Models
+@using Microsoft.AspNetCore.Components.Authorization
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject ReviewService ReviewService
 @page "/products/{id:int}"
@@ -11,6 +12,7 @@
 @inject ProductService ProductService
 @inject OrderService OrderService
 @inject NavigationManager Navigation
+@inject CartService CartService
 
 @if (product == null)
 {
@@ -71,13 +73,21 @@ else
             </MudStack>
 
             <MudStack Row="true"
+                      AlignItems="AlignItems.Center"
                       Spacing="2">
+
+                <MudNumericField T="int"
+                                 @bind-Value="quantity"
+                                 Min="1"
+                                 Max="@product.Stock"
+                                 Variant="Variant.Outlined"
+                                 Style="width:90px;" />
 
                 <MudButton Variant="Variant.Filled"
                            Color="Color.Success"
-                           OnClick="BuyNow">
+                           OnClick="AddToCart">
 
-                    🛒 Buy Now
+                    🛒 Add To Cart
 
                 </MudButton>
 
@@ -215,13 +225,58 @@ else
         review.ProductId = id;
     }
 
-    private async Task BuyNow()
+    // private async Task BuyNow()
+    // {
+    //     var authState =
+    //         await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+    //     var user = authState.User;
+
+
+    //     if (user.Identity?.IsAuthenticated != true)
+    //     {
+    //         message = "Please login first.";
+    //         return;
+    //     }
+
+    //     int userId = int.Parse(
+    //         user.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        
+
+    //     PlaceOrderDTO dto = new()
+    //     {
+    //         Items = new List<ItemDTO>
+    //     {
+    //         new ItemDTO
+    //         {
+    //             ProductId = id,
+    //             Quantity = 1
+    //         }
+    //     }
+    //     };
+
+    //     var result = OrderService.PlaceOrder(dto, userId);
+
+    //     if (result is string messageResult)
+    //     {
+    //         message = messageResult;
+    //     }
+    //     else
+    //     {
+    //         Navigation.NavigateTo("/my-orders");
+    //     }
+    // }
+
+    private async Task AddToCart()
     {
+        if (product == null)
+            return;
+
         var authState =
             await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
         var user = authState.User;
-
 
         if (user.Identity?.IsAuthenticated != true)
         {
@@ -232,31 +287,18 @@ else
         int userId = int.Parse(
             user.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-        
+        CartService.AddToCart(userId, new CartItemDTO
+        {
+            ProductId = product.ProductId,
+            ProductName = product.ProductName,
+            ImageUrl = product.ImageUrl,
+            Price = product.Price,
+            Quantity = quantity
+        });
 
-        PlaceOrderDTO dto = new()
-        {
-            Items = new List<ItemDTO>
-        {
-            new ItemDTO
-            {
-                ProductId = id,
-                Quantity = 1
-            }
-        }
-        };
-
-        var result = OrderService.PlaceOrder(dto, userId);
-
-        if (result is string messageResult)
-        {
-            message = messageResult;
-        }
-        else
-        {
-            Navigation.NavigateTo("/my-orders");
-        }
+        message = "Product added to cart successfully.";
     }
+    private int quantity = 1;
 
     private void Back()
     {
@@ -296,6 +338,21 @@ else
             {
                 ProductId = id
             };
+        }
+    }
+    private void IncreaseQuantity()
+    {
+        if (product != null && quantity < product.Stock)
+        {
+            quantity++;
+        }
+    }
+
+    private void DecreaseQuantity()
+    {
+        if (quantity > 1)
+        {
+            quantity--;
         }
     }
 }

@@ -1,15 +1,13 @@
 ﻿.product-card {
-    cursor: pointer;
-    border-radius: 18px;
+    border-radius: 12px;
     overflow: hidden;
-    transition: .3s;
-    height: 100%;
+    transition: all .25s ease;
 }
 
-    .product-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 12px 30px rgba(0,0,0,.12);
-    }
+::deep .product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0,0,0,.15) !important;
+}
 
 .product-title {
     font-weight: 700;
